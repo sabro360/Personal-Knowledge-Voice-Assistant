@@ -19,11 +19,11 @@
 
 ## T0001 Repository初期化
 
-* [ ] Git repositoryを作成
-* [ ] README.mdを作成
-* [ ] CLAUDE.mdを配置
-* [ ] TASKS.mdを配置
-* [ ] .gitignoreを作成
+* [x] Git repositoryを作成
+* [x] README.mdを作成
+* [x] CLAUDE.mdを配置
+* [x] TASKS.mdを配置
+* [x] .gitignoreを作成
 
 完了条件:
 
