@@ -187,7 +187,7 @@ Sessionを作成する。
 
 ---
 
-## T0302 Session取得API
+## T0302 Session取得API [x]
 
 GET:
 
