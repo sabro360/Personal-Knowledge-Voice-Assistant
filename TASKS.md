@@ -523,7 +523,7 @@ LLMが不正JSON等を返した場合のエラー処理を実装する。
 
 ---
 
-## T0805 Knowledge生成API
+## [x] T0805 Knowledge生成API
 
 POST:
 
