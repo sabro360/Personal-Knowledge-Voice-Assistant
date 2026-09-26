@@ -1,3 +1,4 @@
 from app.repositories.conversation_session_repository import ConversationSessionRepository
+from app.repositories.utterance_repository import UtteranceRepository
 
-__all__ = ["ConversationSessionRepository"]
+__all__ = ["ConversationSessionRepository", "UtteranceRepository"]
