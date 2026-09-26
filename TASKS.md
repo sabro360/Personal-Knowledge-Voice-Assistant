@@ -332,7 +332,7 @@ Text input内容をBackendへ保存する。
 
 ---
 
-## T0504 Assistant Utterance表示
+## T0504 Assistant Utterance表示 [x]
 
 まずはDummy responseでよい。
 
