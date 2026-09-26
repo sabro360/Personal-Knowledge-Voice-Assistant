@@ -18,6 +18,13 @@ def create_session(db: Session = Depends(get_db)) -> ConversationSession:
     return repo.create(started_at=datetime.now(timezone.utc))
 
 
+@router.get("", response_model=list[SessionResponse])
+def list_sessions(db: Session = Depends(get_db)) -> list[ConversationSession]:
+    """Return all conversation sessions ordered by started_at descending."""
+    repo = ConversationSessionRepository(db)
+    return repo.list()
+
+
 @router.get("/{session_id}", response_model=SessionResponse)
 def get_session(session_id: int, db: Session = Depends(get_db)) -> ConversationSession:
     """Return a conversation session by ID."""
