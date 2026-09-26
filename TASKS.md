@@ -467,7 +467,7 @@ AI Providerを直接API層から呼ばない。
 
 ---
 
-## T0704 Knowledge Extraction Test
+## T0704 Knowledge Extraction Test [x]
 
 DummyKnowledgeModelを使用してTestする。
 
