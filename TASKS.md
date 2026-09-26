@@ -136,7 +136,7 @@ Migrationを作成する。
 
 ---
 
-## T0202 Utterance Model作成
+## T0202 Utterance Model作成 [x]
 
 Fields:
 
