@@ -144,3 +144,24 @@ def test_list_utterances_returns_404_for_missing_session() -> None:
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Session not found"
+
+
+def test_finish_session_sets_ended_at() -> None:
+    """POST /sessions/{session_id}/finish should return 200 with ended_at set."""
+    session = client.post("/sessions").json()
+    session_id = session["id"]
+
+    response = client.post(f"/sessions/{session_id}/finish")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == session_id
+    assert data["ended_at"] is not None
+
+
+def test_finish_session_returns_404_for_missing_session() -> None:
+    """POST /sessions/{session_id}/finish should return 404 for non-existent session."""
+    response = client.post("/sessions/99999/finish")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Session not found"

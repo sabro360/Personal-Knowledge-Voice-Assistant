@@ -71,3 +71,13 @@ def list_utterances(session_id: int, db: Session = Depends(get_db)) -> list[Utte
 
     utterance_repo = UtteranceRepository(db)
     return utterance_repo.list_by_session(session_id)
+
+
+@router.post("/{session_id}/finish", response_model=SessionResponse)
+def finish_session(session_id: int, db: Session = Depends(get_db)) -> ConversationSession:
+    """Finish a conversation session by setting ended_at."""
+    repo = ConversationSessionRepository(db)
+    cs = repo.finish(session_id, ended_at=datetime.now(timezone.utc))
+    if cs is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return cs
