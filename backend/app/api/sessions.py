@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -16,3 +16,13 @@ def create_session(db: Session = Depends(get_db)) -> ConversationSession:
     """Create a new conversation session."""
     repo = ConversationSessionRepository(db)
     return repo.create(started_at=datetime.now(timezone.utc))
+
+
+@router.get("/{session_id}", response_model=SessionResponse)
+def get_session(session_id: int, db: Session = Depends(get_db)) -> ConversationSession:
+    """Return a conversation session by ID."""
+    repo = ConversationSessionRepository(db)
+    cs = repo.get_by_id(session_id)
+    if cs is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return cs
