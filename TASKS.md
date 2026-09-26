@@ -149,7 +149,7 @@ Fields:
 
 ---
 
-## T0203 ConversationSession Repository作成
+## T0203 ConversationSession Repository作成 [x]
 
 実装:
 
