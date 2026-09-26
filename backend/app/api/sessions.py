@@ -60,3 +60,14 @@ def add_utterance(
         timestamp=datetime.now(timezone.utc),
         sequence_number=sequence_number,
     )
+
+
+@router.get("/{session_id}/utterances", response_model=list[UtteranceResponse])
+def list_utterances(session_id: int, db: Session = Depends(get_db)) -> list[Utterance]:
+    """Return all utterances for a session ordered by sequence_number ascending."""
+    session_repo = ConversationSessionRepository(db)
+    if session_repo.get_by_id(session_id) is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    utterance_repo = UtteranceRepository(db)
+    return utterance_repo.list_by_session(session_id)

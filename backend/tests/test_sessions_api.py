@@ -108,3 +108,39 @@ def test_add_utterance_returns_404_for_missing_session() -> None:
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Session not found"
+
+
+def test_list_utterances_returns_utterances_in_order() -> None:
+    """GET /sessions/{session_id}/utterances should return utterances in sequence order."""
+    session = client.post("/sessions").json()
+    session_id = session["id"]
+    client.post(f"/sessions/{session_id}/utterances", json={"speaker": "user", "text": "first"})
+    client.post(f"/sessions/{session_id}/utterances", json={"speaker": "assistant", "text": "second"})
+
+    response = client.get(f"/sessions/{session_id}/utterances")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["sequence_number"] == 1
+    assert data[1]["sequence_number"] == 2
+    assert data[0]["text"] == "first"
+
+
+def test_list_utterances_returns_empty_list_for_session_with_no_utterances() -> None:
+    """GET /sessions/{session_id}/utterances should return [] for a session with no utterances."""
+    session = client.post("/sessions").json()
+    session_id = session["id"]
+
+    response = client.get(f"/sessions/{session_id}/utterances")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_list_utterances_returns_404_for_missing_session() -> None:
+    """GET /sessions/{session_id}/utterances should return 404 for non-existent session."""
+    response = client.get("/sessions/99999/utterances")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Session not found"
