@@ -3,15 +3,31 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.db.database import get_db
 from app.models.conversation_session import ConversationSession
+from app.models.knowledge import Knowledge
 from app.models.utterance import Utterance
+from app.providers.errors import KnowledgeExtractionError
+from app.providers.knowledge_model import KnowledgeModel
+from app.providers.openai_knowledge_model import OpenAIKnowledgeModel
 from app.repositories.conversation_session_repository import ConversationSessionRepository
+from app.repositories.keyword_repository import KeywordRepository
+from app.repositories.knowledge_repository import KnowledgeRepository
 from app.repositories.utterance_repository import UtteranceRepository
+from app.schemas.knowledge import KnowledgeResponse
 from app.schemas.session import SessionResponse
 from app.schemas.utterance import UtteranceCreate, UtteranceResponse
+from app.services.knowledge_extraction_service import KnowledgeExtractionService
 
 router = APIRouter()
+
+
+def get_knowledge_model(settings: Settings = Depends(get_settings)) -> KnowledgeModel:
+    """Return the configured KnowledgeModel instance."""
+    if settings.openai_api_key:
+        return OpenAIKnowledgeModel(api_key=settings.openai_api_key)
+    raise HTTPException(status_code=503, detail="OpenAI API key not configured")
 
 
 @router.post("", response_model=SessionResponse, status_code=201)
@@ -71,6 +87,32 @@ def list_utterances(session_id: int, db: Session = Depends(get_db)) -> list[Utte
 
     utterance_repo = UtteranceRepository(db)
     return utterance_repo.list_by_session(session_id)
+
+
+@router.post("/{session_id}/knowledge", response_model=KnowledgeResponse, status_code=201)
+def generate_knowledge(
+    session_id: int,
+    db: Session = Depends(get_db),
+    model: KnowledgeModel = Depends(get_knowledge_model),
+) -> Knowledge:
+    """Generate and persist a Knowledge item from a session's conversation."""
+    session_repo = ConversationSessionRepository(db)
+    if session_repo.get_by_id(session_id) is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    utterance_repo = UtteranceRepository(db)
+    utterances = utterance_repo.list_by_session(session_id)
+
+    service = KnowledgeExtractionService(
+        db=db,
+        knowledge_repo=KnowledgeRepository(db),
+        keyword_repo=KeywordRepository(db),
+        model=model,
+    )
+    try:
+        return service.extract(session_id=session_id, utterances=utterances)
+    except KnowledgeExtractionError:
+        raise HTTPException(status_code=502, detail="Knowledge extraction failed")
 
 
 @router.post("/{session_id}/finish", response_model=SessionResponse)
