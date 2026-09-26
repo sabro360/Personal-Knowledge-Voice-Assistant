@@ -342,7 +342,7 @@ Text input内容をBackendへ保存する。
 
 ---
 
-## T0505 Assistant Utterance保存
+## T0505 Assistant Utterance保存 [x]
 
 Dummy Assistant responseもDBへ保存する。
 
