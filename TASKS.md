@@ -543,7 +543,7 @@ Session終了後にKnowledge生成処理を実行できるようにする。
 
 # Phase 9 - Knowledge UI
 
-## T0901 Knowledge一覧API
+## T0901 Knowledge一覧API [x]
 
 GET:
 
