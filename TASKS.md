@@ -218,7 +218,7 @@ Request:
 
 ---
 
-## T0305 Utterance一覧API
+## T0305 Utterance一覧API [x]
 
 GET:
 
