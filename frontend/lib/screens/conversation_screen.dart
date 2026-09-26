@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/message.dart';
 import '../services/session_service.dart';
+import '../services/utterance_service.dart';
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
@@ -15,8 +16,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  // ignore: unused_field
-  int? _sessionId; // used in T0503
+  int? _sessionId;
   bool _isLoadingSession = true;
   String? _sessionError;
 
@@ -48,7 +48,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     super.dispose();
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
     setState(() {
@@ -56,6 +56,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
     });
     _textController.clear();
     _scrollToBottom();
+    try {
+      await addUtterance(_sessionId!, 'user', text);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('メッセージの保存に失敗しました')),
+        );
+      }
+    }
   }
 
   void _scrollToBottom() {
