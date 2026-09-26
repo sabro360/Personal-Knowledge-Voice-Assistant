@@ -203,7 +203,7 @@ GET:
 
 ---
 
-## T0304 Utterance追加API
+## T0304 Utterance追加API [x]
 
 POST:
 
