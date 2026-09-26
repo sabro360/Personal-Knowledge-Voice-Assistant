@@ -257,7 +257,7 @@ Androidを有効にする。
 
 ---
 
-## T0402 Development環境確認
+## T0402 Development環境確認 [x]
 
 以下を確認する。
 
