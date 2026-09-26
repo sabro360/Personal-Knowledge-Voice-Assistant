@@ -1,6 +1,9 @@
+import json
+
 from openai import OpenAI
 
 from app.models.utterance import Utterance
+from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 
 
 class OpenAIKnowledgeModel:
@@ -14,55 +17,53 @@ class OpenAIKnowledgeModel:
         """Format utterances as a readable conversation transcript."""
         return "\n".join(f"{u.speaker.value}: {u.text}" for u in utterances)
 
-    def _complete(self, system: str, user: str) -> str:
-        """Send a chat completion request and return the stripped response text."""
+    def _extract_all(self, utterances: list[Utterance]) -> KnowledgeExtraction:
+        """Extract all knowledge fields from utterances in a single structured API call."""
+        transcript = self._format_transcript(utterances)
         response = self._client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a knowledge extraction assistant. "
+                        "Analyze the conversation and respond with a JSON object containing exactly these fields: "
+                        "title (concise 5-10 word title), "
+                        "question (the main question discussed), "
+                        "summary (1-3 sentence summary), "
+                        "answer (the answer or conclusion reached), "
+                        "category (1-3 word topic category), "
+                        "keywords (list of key terms as JSON array). "
+                        "Respond in the same language as the conversation."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": f"Extract knowledge from this conversation:\n\n{transcript}",
+                },
             ],
+            response_format={"type": "json_object"},
         )
-        return (response.choices[0].message.content or "").strip()
+        content = response.choices[0].message.content or "{}"
+        return KnowledgeExtraction.model_validate(json.loads(content))
 
     def summarize_conversation(self, utterances: list[Utterance]) -> str:
         """Generate a text summary of the conversation."""
-        transcript = self._format_transcript(utterances)
-        return self._complete(
-            system="You are an expert at summarizing conversations. Respond in the same language as the conversation.",
-            user=f"Summarize the following conversation in 1-3 sentences:\n\n{transcript}",
-        )
+        return self._extract_all(utterances).summary
 
     def extract_questions(self, utterances: list[Utterance]) -> list[str]:
         """Extract questions discussed in the conversation."""
-        transcript = self._format_transcript(utterances)
-        content = self._complete(
-            system="You are an expert at identifying questions from conversations. Respond in the same language as the conversation.",
-            user=f"List the main questions discussed in the following conversation. Return one question per line with no extra formatting:\n\n{transcript}",
-        )
-        return [line.strip() for line in content.splitlines() if line.strip()]
+        question = self._extract_all(utterances).question
+        return [question] if question else []
 
     def extract_keywords(self, utterances: list[Utterance]) -> list[str]:
         """Extract relevant keywords from the conversation."""
-        transcript = self._format_transcript(utterances)
-        content = self._complete(
-            system="You are an expert at extracting keywords from conversations. Respond in the same language as the conversation.",
-            user=f"Extract key terms and concepts from the following conversation. Return one keyword per line with no extra formatting:\n\n{transcript}",
-        )
-        return [line.strip() for line in content.splitlines() if line.strip()]
+        return self._extract_all(utterances).keywords
 
     def classify_category(self, utterances: list[Utterance]) -> str:
         """Classify the main topic of the conversation into a category."""
-        transcript = self._format_transcript(utterances)
-        return self._complete(
-            system="You are an expert at categorizing topics. Respond in the same language as the conversation.",
-            user=f"Classify the main topic of the following conversation into a single category (1-3 words):\n\n{transcript}",
-        )
+        return self._extract_all(utterances).category
 
     def generate_title(self, utterances: list[Utterance]) -> str:
         """Generate a concise title for the knowledge item."""
-        transcript = self._format_transcript(utterances)
-        return self._complete(
-            system="You are an expert at creating concise titles. Respond in the same language as the conversation.",
-            user=f"Generate a concise title (5-10 words) for the following conversation:\n\n{transcript}",
-        )
+        return self._extract_all(utterances).title
