@@ -421,7 +421,7 @@ Many-to-Many relationを実装する。
 
 ---
 
-## T0606 Knowledge Repository Test
+## T0606 Knowledge Repository Test [x]
 
 Knowledge保存・取得をTestする。
 
