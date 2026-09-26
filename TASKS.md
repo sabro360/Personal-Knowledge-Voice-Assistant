@@ -348,7 +348,7 @@ Dummy Assistant responseもDBへ保存する。
 
 ---
 
-## T0506 Conversation終了処理
+## T0506 Conversation終了処理 [x]
 
 Finish buttonでSessionを終了する。
 
