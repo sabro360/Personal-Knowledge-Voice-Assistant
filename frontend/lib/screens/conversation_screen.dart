@@ -65,6 +65,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
         );
       }
     }
+    if (mounted) {
+      setState(() {
+        _messages.add(Message(speaker: 'assistant', text: 'You said: $text'));
+      });
+      _scrollToBottom();
+    }
   }
 
   void _scrollToBottom() {
