@@ -267,7 +267,7 @@ Androidを有効にする。
 
 ---
 
-## T0403 Flutter directory整理
+## T0403 Flutter directory整理 [x]
 
 作成:
 
