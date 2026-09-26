@@ -533,7 +533,7 @@ ConversationからKnowledgeを生成する。
 
 ---
 
-## T0806 Session終了との連携
+## [x] T0806 Session終了との連携
 
 Session終了後にKnowledge生成処理を実行できるようにする。
 
