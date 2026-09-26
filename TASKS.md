@@ -236,7 +236,7 @@ ended_atを設定する。
 
 ---
 
-## T0307 Conversation API Integration Test
+## T0307 Conversation API Integration Test [x]
 
 以下をTestする。
 
