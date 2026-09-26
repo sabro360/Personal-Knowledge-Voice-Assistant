@@ -116,10 +116,28 @@ def generate_knowledge(
 
 
 @router.post("/{session_id}/finish", response_model=SessionResponse)
-def finish_session(session_id: int, db: Session = Depends(get_db)) -> ConversationSession:
-    """Finish a conversation session by setting ended_at."""
+def finish_session(
+    session_id: int,
+    db: Session = Depends(get_db),
+    model: KnowledgeModel = Depends(get_knowledge_model),
+) -> ConversationSession:
+    """Finish a conversation session and trigger synchronous knowledge generation."""
     repo = ConversationSessionRepository(db)
     cs = repo.finish(session_id, ended_at=datetime.now(timezone.utc))
     if cs is None:
         raise HTTPException(status_code=404, detail="Session not found")
+
+    utterance_repo = UtteranceRepository(db)
+    utterances = utterance_repo.list_by_session(session_id)
+    service = KnowledgeExtractionService(
+        db=db,
+        knowledge_repo=KnowledgeRepository(db),
+        keyword_repo=KeywordRepository(db),
+        model=model,
+    )
+    try:
+        service.extract(session_id=session_id, utterances=utterances)
+    except KnowledgeExtractionError:
+        pass  # Knowledge generation failure does not block session finish
+
     return cs

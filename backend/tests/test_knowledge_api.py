@@ -69,3 +69,31 @@ def test_generate_knowledge_returns_502_on_extraction_error() -> None:
 
     assert response.status_code == 502
     assert response.json()["detail"] == "Knowledge extraction failed"
+
+
+def test_finish_session_succeeds_even_if_knowledge_extraction_fails() -> None:
+    """POST /sessions/{session_id}/finish should return 200 even when knowledge extraction fails."""
+
+    class FailingModel:
+        def summarize_conversation(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
+        def extract_questions(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
+        def extract_keywords(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
+        def classify_category(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
+        def generate_title(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
+    app.dependency_overrides[get_knowledge_model] = lambda: FailingModel()
+    session = client.post("/sessions").json()
+
+    response = client.post(f"/sessions/{session['id']}/finish")
+
+    assert response.status_code == 200
+    assert response.json()["ended_at"] is not None
