@@ -169,7 +169,7 @@ Fields:
 
 ---
 
-## T0205 Repository Unit Test
+## T0205 Repository Unit Test [x]
 
 Session RepositoryとUtterance RepositoryのTestを書く。
 
