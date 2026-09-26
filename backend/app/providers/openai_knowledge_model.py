@@ -1,8 +1,10 @@
 import json
 
 from openai import OpenAI
+from pydantic import ValidationError
 
 from app.models.utterance import Utterance
+from app.providers.errors import KnowledgeExtractionError
 from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 
 
@@ -45,7 +47,14 @@ class OpenAIKnowledgeModel:
             response_format={"type": "json_object"},
         )
         content = response.choices[0].message.content or "{}"
-        return KnowledgeExtraction.model_validate(json.loads(content))
+        try:
+            data = json.loads(content)
+        except json.JSONDecodeError as exc:
+            raise KnowledgeExtractionError(f"LLM returned invalid JSON: {exc}") from exc
+        try:
+            return KnowledgeExtraction.model_validate(data)
+        except ValidationError as exc:
+            raise KnowledgeExtractionError(f"LLM response does not match expected schema: {exc}") from exc
 
     def summarize_conversation(self, utterances: list[Utterance]) -> str:
         """Generate a text summary of the conversation."""
