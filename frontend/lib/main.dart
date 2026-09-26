@@ -39,7 +39,7 @@ class BackendStatusPage extends StatelessWidget {
               return const CircularProgressIndicator();
             }
             if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
+              return Text(healthErrorMessage(snapshot.error!));
             }
             return Text('Backend: ${snapshot.data}');
           },
