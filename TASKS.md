@@ -443,7 +443,7 @@ InterfaceまたはProtocolを定義する。
 
 ---
 
-## T0702 DummyKnowledgeModel作成
+## T0702 DummyKnowledgeModel作成 [x]
 
 APIを使わず固定結果を返すFake Providerを作る。
 
