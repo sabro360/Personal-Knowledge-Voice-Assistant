@@ -122,7 +122,7 @@ Database migrationを管理できる状態にする。
 
 # Phase 2 - Conversation Database
 
-## T0201 ConversationSession Model作成
+## T0201 ConversationSession Model作成 [x]
 
 Fields:
 
