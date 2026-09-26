@@ -6,3 +6,9 @@ Future<int> createSession() async {
   final result = await client.post('/sessions') as Map<String, dynamic>;
   return result['id'] as int;
 }
+
+/// Calls POST /sessions/{sessionId}/finish to end the session.
+Future<void> finishSession(int sessionId) async {
+  final client = ApiClient();
+  await client.post('/sessions/$sessionId/finish');
+}

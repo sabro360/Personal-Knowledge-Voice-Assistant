@@ -19,6 +19,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   int? _sessionId;
   bool _isLoadingSession = true;
   String? _sessionError;
+  bool _isFinished = false;
 
   @override
   void initState() {
@@ -83,6 +84,26 @@ class _ConversationScreenState extends State<ConversationScreen> {
     }
   }
 
+  Future<void> _finishSession() async {
+    try {
+      await finishSession(_sessionId!);
+      if (mounted) {
+        setState(() {
+          _isFinished = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('会話を終了しました')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('会話の終了に失敗しました')),
+        );
+      }
+    }
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -102,7 +123,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         title: const Text('会話'),
         actions: [
           TextButton(
-            onPressed: () {}, // T0506で実装
+            onPressed: (_sessionId == null || _isFinished) ? null : _finishSession,
             child: const Text('終了'),
           ),
         ],
