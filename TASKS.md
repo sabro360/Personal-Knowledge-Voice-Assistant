@@ -195,7 +195,7 @@ GET:
 
 ---
 
-## T0303 Session一覧API
+## T0303 Session一覧API [x]
 
 GET:
 
