@@ -386,7 +386,7 @@ Fields:
 
 ---
 
-## T0602 Keyword Model作成
+## T0602 Keyword Model作成 [x]
 
 Fields:
 
