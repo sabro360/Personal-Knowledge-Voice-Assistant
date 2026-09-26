@@ -496,7 +496,7 @@ KnowledgeModel interfaceを実装する。
 
 ---
 
-## T0803 Structured Output定義
+## [x] T0803 Structured Output定義
 
 LLM出力をJSON schema等で構造化する。
 
