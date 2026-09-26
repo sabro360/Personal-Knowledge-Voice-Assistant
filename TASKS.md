@@ -287,7 +287,7 @@ FastAPIと通信するAPI Clientを作成する。
 
 ---
 
-## T0405 Health Check呼び出し
+## T0405 Health Check呼び出し [x]
 
 Flutterから:
 
