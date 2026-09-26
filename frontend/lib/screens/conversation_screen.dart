@@ -66,10 +66,20 @@ class _ConversationScreenState extends State<ConversationScreen> {
       }
     }
     if (mounted) {
+      final dummyText = 'You said: $text';
       setState(() {
-        _messages.add(Message(speaker: 'assistant', text: 'You said: $text'));
+        _messages.add(Message(speaker: 'assistant', text: dummyText));
       });
       _scrollToBottom();
+      try {
+        await addUtterance(_sessionId!, 'assistant', dummyText);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('メッセージの保存に失敗しました')),
+          );
+        }
+      }
     }
   }
 
