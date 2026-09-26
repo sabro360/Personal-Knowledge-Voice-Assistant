@@ -320,7 +320,7 @@ Backend停止時にCrashせずエラー表示する。
 
 ---
 
-## T0502 Session開始処理
+## T0502 Session開始処理 [x]
 
 画面開始時またはButton押下時にSessionを作る。
 
