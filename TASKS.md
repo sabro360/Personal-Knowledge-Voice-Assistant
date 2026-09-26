@@ -297,7 +297,7 @@ GET /health
 
 ---
 
-## T0406 API接続エラー表示
+## T0406 API接続エラー表示 [x]
 
 Backend停止時にCrashせずエラー表示する。
 
