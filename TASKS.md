@@ -395,7 +395,7 @@ Fields:
 
 ---
 
-## T0603 KnowledgeKeyword Model作成
+## T0603 KnowledgeKeyword Model作成 [x]
 
 Many-to-Many relationを実装する。
 
