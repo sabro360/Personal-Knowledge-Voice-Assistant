@@ -401,7 +401,7 @@ Many-to-Many relationを実装する。
 
 ---
 
-## T0604 Knowledge Repository作成
+## T0604 Knowledge Repository作成 [x]
 
 実装:
 
