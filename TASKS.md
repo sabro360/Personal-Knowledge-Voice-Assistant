@@ -177,7 +177,7 @@ Session RepositoryとUtterance RepositoryのTestを書く。
 
 # Phase 3 - Conversation API
 
-## T0301 Session作成API
+## T0301 Session作成API [x]
 
 POST:
 
