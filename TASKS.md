@@ -281,7 +281,7 @@ state/
 
 ---
 
-## T0404 Backend API Client作成
+## T0404 Backend API Client作成 [x]
 
 FastAPIと通信するAPI Clientを作成する。
 
