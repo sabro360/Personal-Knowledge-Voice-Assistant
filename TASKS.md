@@ -309,7 +309,7 @@ Backend停止時にCrashせずエラー表示する。
 
 ---
 
-## T0501 Conversation Screen作成
+## T0501 Conversation Screen作成 [x]
 
 最低限:
 
