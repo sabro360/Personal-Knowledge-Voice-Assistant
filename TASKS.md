@@ -412,7 +412,7 @@ Many-to-Many relationを実装する。
 
 ---
 
-## T0605 Keyword Repository作成
+## T0605 Keyword Repository作成 [x]
 
 実装:
 
