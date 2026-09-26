@@ -481,7 +481,7 @@ API Keyを環境変数から読み込む。
 
 ---
 
-## T0802 OpenAI Knowledge Provider作成
+## T0802 OpenAI Knowledge Provider作成 [x]
 
 KnowledgeModel interfaceを実装する。
 
