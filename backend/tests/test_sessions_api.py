@@ -59,3 +59,52 @@ def test_list_sessions_returns_200_as_list() -> None:
 
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
+
+def test_add_utterance_returns_201() -> None:
+    """POST /sessions/{session_id}/utterances should return 201 with utterance data."""
+    session = client.post("/sessions").json()
+    session_id = session["id"]
+
+    response = client.post(
+        f"/sessions/{session_id}/utterances",
+        json={"speaker": "user", "text": "なぜCDって虹色なの？"},
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert isinstance(data["id"], int)
+    assert data["session_id"] == session_id
+    assert data["speaker"] == "user"
+    assert data["text"] == "なぜCDって虹色なの？"
+    assert "timestamp" in data
+    assert data["sequence_number"] == 1
+
+
+def test_add_utterance_increments_sequence_number() -> None:
+    """sequence_number should increment with each utterance added."""
+    session = client.post("/sessions").json()
+    session_id = session["id"]
+
+    first = client.post(
+        f"/sessions/{session_id}/utterances",
+        json={"speaker": "user", "text": "first"},
+    ).json()
+    second = client.post(
+        f"/sessions/{session_id}/utterances",
+        json={"speaker": "assistant", "text": "second"},
+    ).json()
+
+    assert first["sequence_number"] == 1
+    assert second["sequence_number"] == 2
+
+
+def test_add_utterance_returns_404_for_missing_session() -> None:
+    """POST /sessions/{session_id}/utterances should return 404 for non-existent session."""
+    response = client.post(
+        "/sessions/99999/utterances",
+        json={"speaker": "user", "text": "hello"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Session not found"

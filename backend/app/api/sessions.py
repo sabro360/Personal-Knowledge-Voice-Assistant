@@ -5,8 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.conversation_session import ConversationSession
+from app.models.utterance import Utterance
 from app.repositories.conversation_session_repository import ConversationSessionRepository
+from app.repositories.utterance_repository import UtteranceRepository
 from app.schemas.session import SessionResponse
+from app.schemas.utterance import UtteranceCreate, UtteranceResponse
 
 router = APIRouter()
 
@@ -33,3 +36,27 @@ def get_session(session_id: int, db: Session = Depends(get_db)) -> ConversationS
     if cs is None:
         raise HTTPException(status_code=404, detail="Session not found")
     return cs
+
+
+@router.post("/{session_id}/utterances", response_model=UtteranceResponse, status_code=201)
+def add_utterance(
+    session_id: int,
+    body: UtteranceCreate,
+    db: Session = Depends(get_db),
+) -> Utterance:
+    """Add an utterance to a conversation session."""
+    session_repo = ConversationSessionRepository(db)
+    if session_repo.get_by_id(session_id) is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    utterance_repo = UtteranceRepository(db)
+    existing = utterance_repo.list_by_session(session_id)
+    sequence_number = len(existing) + 1
+
+    return utterance_repo.create(
+        session_id=session_id,
+        speaker=body.speaker,
+        text=body.text,
+        timestamp=datetime.now(timezone.utc),
+        sequence_number=sequence_number,
+    )
