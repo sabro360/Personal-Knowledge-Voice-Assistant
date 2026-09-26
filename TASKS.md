@@ -354,7 +354,7 @@ Finish buttonでSessionを終了する。
 
 ---
 
-## T0507 Conversation履歴確認
+## T0507 Conversation履歴確認 [x]
 
 DBに以下が正しい順番で保存されることを確認する。
 
