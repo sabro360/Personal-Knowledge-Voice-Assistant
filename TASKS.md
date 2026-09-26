@@ -326,7 +326,7 @@ Backend停止時にCrashせずエラー表示する。
 
 ---
 
-## T0503 User Utterance保存
+## T0503 User Utterance保存 [x]
 
 Text input内容をBackendへ保存する。
 
