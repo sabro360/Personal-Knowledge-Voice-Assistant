@@ -370,7 +370,7 @@ assistant
 
 # Phase 6 - Knowledge Database
 
-## T0601 Knowledge Model作成
+## T0601 Knowledge Model作成 [x]
 
 Fields:
 
