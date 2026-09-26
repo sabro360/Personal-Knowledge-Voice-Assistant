@@ -9,7 +9,10 @@ from app.core.config import get_settings
 def _create_engine() -> Engine:
     """Create database engine from application settings."""
     settings = get_settings()
-    return create_engine(settings.database_url)
+    connect_args: dict[str, object] = {}
+    if settings.database_url.startswith("sqlite"):
+        connect_args["check_same_thread"] = False
+    return create_engine(settings.database_url, connect_args=connect_args)
 
 
 engine: Engine = _create_engine()
