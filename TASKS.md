@@ -475,7 +475,7 @@ DummyKnowledgeModelを使用してTestする。
 
 # Phase 8 - Real LLM Integration
 
-## T0801 AI API設定追加
+## T0801 AI API設定追加 [x]
 
 API Keyを環境変数から読み込む。
 
