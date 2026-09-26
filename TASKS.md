@@ -453,7 +453,7 @@ Business Logicを外部AIなしでTest可能にする。
 
 ---
 
-## T0703 Knowledge Extraction Service作成
+## T0703 Knowledge Extraction Service作成 [x]
 
 Input:
 
