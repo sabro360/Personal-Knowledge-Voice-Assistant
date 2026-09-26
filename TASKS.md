@@ -160,7 +160,7 @@ Fields:
 
 ---
 
-## T0204 Utterance Repository作成
+## T0204 Utterance Repository作成 [x]
 
 実装:
 
