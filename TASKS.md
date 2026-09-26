@@ -249,7 +249,7 @@ ended_atを設定する。
 
 # Phase 4 - Flutter Foundation
 
-## T0401 Flutter project作成
+## T0401 Flutter project作成 [x]
 
 frontend/にFlutter projectを作成する。
 
