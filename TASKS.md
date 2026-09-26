@@ -517,7 +517,7 @@ LLM出力をJSON schema等で構造化する。
 
 ---
 
-## T0804 Invalid Response処理
+## [x] T0804 Invalid Response処理
 
 LLMが不正JSON等を返した場合のエラー処理を実装する。
 
