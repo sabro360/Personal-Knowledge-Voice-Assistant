@@ -226,7 +226,7 @@ GET:
 
 ---
 
-## T0306 Session終了API
+## T0306 Session終了API [x]
 
 POST:
 
