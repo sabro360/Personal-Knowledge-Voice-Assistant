@@ -429,7 +429,7 @@ Knowledge保存・取得をTestする。
 
 # Phase 7 - AI Provider Foundation
 
-## T0701 KnowledgeModel interface定義
+## T0701 KnowledgeModel interface定義 [x]
 
 InterfaceまたはProtocolを定義する。
 
