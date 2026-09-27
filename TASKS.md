@@ -582,7 +582,7 @@ GET:
 
 ---
 
-## T0905 元Conversationへのリンク
+## T0905 元Conversationへのリンク [x]
 
 Knowledgeから元Sessionを開けるようにする。
 
