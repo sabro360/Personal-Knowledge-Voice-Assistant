@@ -670,7 +670,7 @@ WebRTC dependencyを追加する。
 
 ---
 
-## T1105 WebRTC microphone track確認
+## T1105 WebRTC microphone track確認 [x]
 
 Local audio trackを取得する。
 
