@@ -551,7 +551,7 @@ GET:
 
 ---
 
-## T0902 Knowledge詳細API
+## T0902 Knowledge詳細API [x]
 
 GET:
 
