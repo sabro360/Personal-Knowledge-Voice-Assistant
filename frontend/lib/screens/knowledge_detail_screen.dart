@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/knowledge.dart';
 import '../services/knowledge_service.dart';
+import 'conversation_history_screen.dart';
 
 class KnowledgeDetailScreen extends StatefulWidget {
   final int knowledgeId;
@@ -88,6 +89,20 @@ class _KnowledgeDetailScreenState extends State<KnowledgeDetailScreen> {
             const SizedBox(height: 16),
             _buildSection('回答', k.answer!),
           ],
+          const SizedBox(height: 24),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: const Text('元の会話を見る'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ConversationHistoryScreen(sessionId: k.sessionId),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
