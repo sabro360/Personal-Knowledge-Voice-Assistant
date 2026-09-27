@@ -692,7 +692,7 @@ POST /realtime/session
 
 ---
 
-## T1203 Credential error handling
+## T1203 Credential error handling [x]
 
 API Key不足
 

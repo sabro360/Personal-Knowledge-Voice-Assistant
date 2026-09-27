@@ -42,3 +42,18 @@ def test_create_realtime_session_returns_503_when_provider_not_configured() -> N
     app.dependency_overrides[get_voice_provider] = lambda: DummyVoiceProvider()
     assert response.status_code == 503
     assert response.json()["detail"] == "Voice provider not configured"
+
+
+def test_create_realtime_session_returns_502_on_provider_error() -> None:
+    """POST /realtime/session should return 502 when the voice provider raises VoiceProviderError."""
+    from app.providers.errors import VoiceProviderError
+
+    class FailingProvider:
+        def create_realtime_credentials(self) -> None:
+            raise VoiceProviderError("test error")
+
+    app.dependency_overrides[get_voice_provider] = lambda: FailingProvider()
+    response = client.post("/realtime/session")
+    app.dependency_overrides[get_voice_provider] = lambda: DummyVoiceProvider()
+    assert response.status_code == 502
+    assert response.json()["detail"] == "Voice provider error"
