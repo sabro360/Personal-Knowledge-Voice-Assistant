@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -15,6 +15,16 @@ def list_knowledge(db: Session = Depends(get_db)) -> list[Knowledge]:
     """Return all knowledge items ordered by created_at descending."""
     repo = KnowledgeRepository(db)
     return repo.list()
+
+
+@router.get("/search", response_model=list[KnowledgeResponse])
+def search_knowledge(
+    q: str = Query(min_length=1),
+    db: Session = Depends(get_db),
+) -> list[Knowledge]:
+    """Search knowledge items by title, question, summary, or answer."""
+    repo = KnowledgeRepository(db)
+    return repo.search(q)
 
 
 @router.get("/{knowledge_id}", response_model=KnowledgeDetailResponse)
