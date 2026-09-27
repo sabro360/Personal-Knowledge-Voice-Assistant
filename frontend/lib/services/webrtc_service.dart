@@ -42,22 +42,28 @@ class WebRtcService {
   /// Establishes a WebRTC PeerConnection with the OpenAI Realtime API.
   ///
   /// Steps:
-  /// 1. Creates an [RTCPeerConnection] with a sendrecv audio transceiver.
-  /// 2. Creates an SDP offer and waits for ICE gathering to complete.
-  /// 3. POSTs the SDP offer to OpenAI using [clientSecret].
-  /// 4. Sets the SDP answer as the remote description.
-  ///
-  /// T1303 will add the actual microphone track after connection is established.
+  /// 1. Acquires the microphone track via [getLocalAudioTrack].
+  /// 2. Creates an [RTCPeerConnection] with the track in a sendrecv transceiver.
+  /// 3. Creates an SDP offer and waits for ICE gathering to complete.
+  /// 4. POSTs the SDP offer to OpenAI using [clientSecret].
+  /// 5. Sets the SDP answer as the remote description.
   Future<void> connect(String clientSecret) async {
+    // Release any existing local stream before starting a new connection.
+    await stop();
+
+    // Acquire the microphone track before creating the offer so the SDP
+    // reflects the actual track rather than an empty transceiver.
+    final track = await getLocalAudioTrack();
+
     final pc = await createPeerConnection({
       'iceServers': <Map<String, dynamic>>[],
       'sdpSemantics': 'unified-plan',
     });
     _peerConnection = pc;
 
-    // Declare audio capability (sendrecv). T1303 adds the actual mic track.
+    // Add the microphone track with sendrecv direction.
     await pc.addTransceiver(
-      kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
+      track: track,
       init: RTCRtpTransceiverInit(direction: TransceiverDirection.SendRecv),
     );
 

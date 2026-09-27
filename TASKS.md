@@ -722,7 +722,7 @@ Realtime APIとのPeerConnectionを確立する。
 
 ---
 
-## T1303 Microphone track送信
+## T1303 Microphone track送信 [x]
 
 User audioをRealtime APIへ送る。
 
