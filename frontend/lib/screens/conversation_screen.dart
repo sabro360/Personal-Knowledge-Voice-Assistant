@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
-import '../services/audio_player_service.dart';
-import '../services/audio_recorder_service.dart';
 import '../services/permission_service.dart';
+import '../services/realtime_voice_service.dart';
 import '../services/session_service.dart';
 import '../services/utterance_service.dart';
-import '../services/webrtc_service.dart';
 import 'knowledge_list_screen.dart';
 
 class ConversationScreen extends StatefulWidget {
@@ -21,14 +19,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  final AudioRecorderService _audioRecorderService = AudioRecorderService();
-  bool _isRecording = false;
-
-  late final AudioPlayerService _audioPlayerService;
-  bool _isPlaying = false;
-
-  final WebRtcService _webRtcService = WebRtcService();
-  bool _hasWebRtcTrack = false;
+  final RealtimeVoiceService _voiceService = RealtimeVoiceService();
 
   int? _sessionId;
   bool _isLoadingSession = true;
@@ -38,13 +29,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    _audioPlayerService = AudioPlayerService()
-      ..onComplete = () {
-        if (mounted) setState(() => _isPlaying = false);
-      };
+    _voiceService.isRecording.addListener(_onVoiceStateChanged);
+    _voiceService.isPlaying.addListener(_onVoiceStateChanged);
+    _voiceService.hasTrack.addListener(_onVoiceStateChanged);
     _requestPermissions();
     _createSession();
   }
+
+  void _onVoiceStateChanged() => setState(() {});
 
   Future<void> _requestPermissions() async {
     await requestMicrophonePermission();
@@ -67,22 +59,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   void dispose() {
-    _audioRecorderService.dispose();
-    _audioPlayerService.dispose();
-    _webRtcService.dispose();
+    _voiceService.isRecording.removeListener(_onVoiceStateChanged);
+    _voiceService.isPlaying.removeListener(_onVoiceStateChanged);
+    _voiceService.hasTrack.removeListener(_onVoiceStateChanged);
+    _voiceService.dispose();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   Future<void> _togglePlayback() async {
-    if (_isPlaying) {
-      await _audioPlayerService.stop();
-      if (mounted) setState(() => _isPlaying = false);
+    if (_voiceService.isPlaying.value) {
+      await _voiceService.stopPlayback();
     } else {
       try {
-        await _audioPlayerService.playTestBeep();
-        if (mounted) setState(() => _isPlaying = true);
+        await _voiceService.startPlayback();
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -94,13 +85,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   Future<void> _toggleRecording() async {
-    if (_isRecording) {
-      await _audioRecorderService.stop();
-      if (mounted) setState(() => _isRecording = false);
+    if (_voiceService.isRecording.value) {
+      await _voiceService.stopRecording();
     } else {
       try {
-        await _audioRecorderService.start();
-        if (mounted) setState(() => _isRecording = true);
+        await _voiceService.startRecording();
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -113,15 +102,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   Future<void> _testWebRtcTrack() async {
     try {
-      final track = await _webRtcService.getLocalAudioTrack();
+      final trackInfo = await _voiceService.acquireTrack();
       if (mounted) {
-        setState(() => _hasWebRtcTrack = true);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('WebRTC audio track: ${track.kind} / ${track.id}')),
+          SnackBar(content: Text('WebRTC audio track: $trackInfo')),
         );
       }
-      await _webRtcService.stop();
-      if (mounted) setState(() => _hasWebRtcTrack = false);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -278,22 +264,26 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: Icon(_isPlaying ? Icons.stop_circle : Icons.volume_up),
-                color: _isPlaying ? Colors.blue : null,
+                icon: Icon(_voiceService.isPlaying.value
+                    ? Icons.stop_circle
+                    : Icons.volume_up),
+                color: _voiceService.isPlaying.value ? Colors.blue : null,
                 onPressed: (_sessionId == null || _isFinished)
                     ? null
                     : _togglePlayback,
               ),
               IconButton(
-                icon: Icon(_isRecording ? Icons.stop_circle : Icons.mic),
-                color: _isRecording ? Colors.red : null,
+                icon: Icon(_voiceService.isRecording.value
+                    ? Icons.stop_circle
+                    : Icons.mic),
+                color: _voiceService.isRecording.value ? Colors.red : null,
                 onPressed: (_sessionId == null || _isFinished)
                     ? null
                     : _toggleRecording,
               ),
               IconButton(
                 icon: const Icon(Icons.graphic_eq),
-                color: _hasWebRtcTrack ? Colors.green : null,
+                color: _voiceService.hasTrack.value ? Colors.green : null,
                 onPressed: (_sessionId == null || _isFinished)
                     ? null
                     : _testWebRtcTrack,

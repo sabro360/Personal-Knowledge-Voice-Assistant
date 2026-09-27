@@ -706,7 +706,7 @@ Network error
 
 # Phase 13 - Realtime Voice Connection
 
-## T1301 Flutter Realtime Service作成
+## T1301 Flutter Realtime Service作成 [x]
 
 Voice関連コードをUIから分離する。
 
