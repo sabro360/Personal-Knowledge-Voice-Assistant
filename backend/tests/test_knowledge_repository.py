@@ -149,3 +149,68 @@ def test_update_returns_none_for_missing_id() -> None:
         )
 
         assert result is None
+
+
+def test_search_returns_matching_knowledge_by_title() -> None:
+    """search() should return Knowledge items matching the query in title."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, title="CDの虹色の仕組み", summary="光の回折")
+        repo.create(session_id=cs.id, title="水滴と光の関係", summary="虹の仕組み")
+
+        results = repo.search("CD")
+
+        assert len(results) == 1
+        assert results[0].title == "CDの虹色の仕組み"
+
+
+def test_search_returns_matching_knowledge_by_question() -> None:
+    """search() should return Knowledge items matching the query in question."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, question="なぜ空は青いのか", summary="光の散乱")
+
+        results = repo.search("空は青い")
+
+        assert len(results) == 1
+        assert results[0].question == "なぜ空は青いのか"
+
+
+def test_search_returns_empty_list_when_no_match() -> None:
+    """search() should return an empty list when no Knowledge items match."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, title="量子力学の基礎", summary="波動関数")
+
+        results = repo.search("全く関係ないキーワード")
+
+        assert results == []
+
+
+def test_search_is_case_insensitive() -> None:
+    """search() should match regardless of case."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, title="Python programming basics", summary="vars")
+
+        results_lower = repo.search("python")
+        results_upper = repo.search("PYTHON")
+
+        assert len(results_lower) == 1
+        assert len(results_upper) == 1

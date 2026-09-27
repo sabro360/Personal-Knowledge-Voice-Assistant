@@ -1,4 +1,6 @@
-from sqlalchemy import select
+from __future__ import annotations
+
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.models.knowledge import Knowledge
@@ -41,6 +43,26 @@ class KnowledgeRepository:
     def list(self) -> list[Knowledge]:
         """Return all Knowledge items ordered by created_at descending."""
         stmt = select(Knowledge).order_by(Knowledge.created_at.desc())
+        return list(self._db.scalars(stmt).all())
+
+    def search(self, query: str) -> list[Knowledge]:
+        """Return Knowledge items where title, question, summary, or answer match the query.
+
+        Uses case-insensitive LIKE pattern matching ordered by created_at descending.
+        """
+        pattern = f"%{query}%"
+        stmt = (
+            select(Knowledge)
+            .where(
+                or_(
+                    Knowledge.title.ilike(pattern),
+                    Knowledge.question.ilike(pattern),
+                    Knowledge.summary.ilike(pattern),
+                    Knowledge.answer.ilike(pattern),
+                )
+            )
+            .order_by(Knowledge.created_at.desc())
+        )
         return list(self._db.scalars(stmt).all())
 
     def update(
