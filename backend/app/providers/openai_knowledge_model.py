@@ -1,6 +1,6 @@
 import json
 
-from openai import OpenAI
+from openai import APIError, OpenAI
 from pydantic import ValidationError
 
 from app.models.utterance import Utterance
@@ -22,30 +22,33 @@ class OpenAIKnowledgeModel:
     def _extract_all(self, utterances: list[Utterance]) -> KnowledgeExtraction:
         """Extract all knowledge fields from utterances in a single structured API call."""
         transcript = self._format_transcript(utterances)
-        response = self._client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a knowledge extraction assistant. "
-                        "Analyze the conversation and respond with a JSON object containing exactly these fields: "
-                        "title (concise 5-10 word title), "
-                        "question (the main question discussed), "
-                        "summary (1-3 sentence summary), "
-                        "answer (the answer or conclusion reached), "
-                        "category (1-3 word topic category), "
-                        "keywords (list of key terms as JSON array). "
-                        "Respond in the same language as the conversation."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": f"Extract knowledge from this conversation:\n\n{transcript}",
-                },
-            ],
-            response_format={"type": "json_object"},
-        )
+        try:
+            response = self._client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a knowledge extraction assistant. "
+                            "Analyze the conversation and respond with a JSON object containing exactly these fields: "
+                            "title (concise 5-10 word title), "
+                            "question (the main question discussed), "
+                            "summary (1-3 sentence summary), "
+                            "answer (the answer or conclusion reached), "
+                            "category (1-3 word topic category), "
+                            "keywords (list of key terms as JSON array). "
+                            "Respond in the same language as the conversation."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Extract knowledge from this conversation:\n\n{transcript}",
+                    },
+                ],
+                response_format={"type": "json_object"},
+            )
+        except APIError as exc:
+            raise KnowledgeExtractionError(f"OpenAI API error: {exc}") from exc
         content = response.choices[0].message.content or "{}"
         try:
             data = json.loads(content)
