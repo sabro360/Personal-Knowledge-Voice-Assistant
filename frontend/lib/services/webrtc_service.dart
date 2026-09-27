@@ -12,8 +12,7 @@ class WebRtcService {
   RTCPeerConnection? _peerConnection;
 
   // OpenAI Realtime API SDP endpoint (WebRTC offer/answer exchange)
-  static const _sdpEndpoint =
-      'https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview';
+  static const _sdpEndpoint = 'https://api.openai.com/v1/realtime/calls';
 
   /// Requests a local audio track via WebRTC getUserMedia.
   Future<MediaStreamTrack> getLocalAudioTrack() async {
@@ -122,7 +121,7 @@ class WebRtcService {
       },
       body: sdpOffer,
     );
-    if (response.statusCode != 201) {
+    if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('OpenAI SDP exchange failed: ${response.statusCode}');
     }
     return response.body;
