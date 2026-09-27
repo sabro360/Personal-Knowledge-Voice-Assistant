@@ -569,7 +569,7 @@ GET:
 
 ---
 
-## T0904 Flutter Knowledge詳細画面
+## T0904 Flutter Knowledge詳細画面 [x]
 
 表示:
 
