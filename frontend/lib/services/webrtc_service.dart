@@ -79,6 +79,9 @@ class WebRtcService {
     );
 
     await pc.setRemoteDescription(RTCSessionDescription(sdpAnswer, 'answer'));
+
+    // Route audio to speakerphone rather than earpiece.
+    await Helper.setSpeakerphoneOn(true);
   }
 
   /// Closes the PeerConnection.

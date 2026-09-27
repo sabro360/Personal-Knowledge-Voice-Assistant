@@ -728,7 +728,7 @@ User audioをRealtime APIへ送る。
 
 ---
 
-## T1304 AI audio受信
+## T1304 AI audio受信 [x]
 
 AI response audioを再生する。
 
