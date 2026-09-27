@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
+import '../models/voice_connection_state.dart';
 import '../services/permission_service.dart';
 import '../services/realtime_voice_service.dart';
 import '../services/session_service.dart';
@@ -32,6 +33,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _voiceService.isRecording.addListener(_onVoiceStateChanged);
     _voiceService.isPlaying.addListener(_onVoiceStateChanged);
     _voiceService.isConnected.addListener(_onVoiceStateChanged);
+    _voiceService.connectionState.addListener(_onVoiceStateChanged);
     _requestPermissions();
     _createSession();
   }
@@ -62,6 +64,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _voiceService.isRecording.removeListener(_onVoiceStateChanged);
     _voiceService.isPlaying.removeListener(_onVoiceStateChanged);
     _voiceService.isConnected.removeListener(_onVoiceStateChanged);
+    _voiceService.connectionState.removeListener(_onVoiceStateChanged);
     _voiceService.dispose();
     _textController.dispose();
     _scrollController.dispose();
@@ -171,6 +174,35 @@ class _ConversationScreenState extends State<ConversationScreen> {
     }
   }
 
+  Widget _buildConnectionStateIndicator() {
+    final state = _voiceService.connectionState.value;
+    if (state == VoiceConnectionState.disconnected) {
+      return const SizedBox.shrink();
+    }
+    final (String label, Color color) = switch (state) {
+      VoiceConnectionState.connecting => ('接続中...', Colors.orange),
+      VoiceConnectionState.listening => ('Listening', Colors.green),
+      VoiceConnectionState.thinking => ('Thinking', Colors.amber),
+      VoiceConnectionState.speaking => ('Speaking', Colors.blue),
+      VoiceConnectionState.error => ('エラー', Colors.red),
+      VoiceConnectionState.disconnected => ('', Colors.grey),
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(color: color, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -246,6 +278,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
             },
           ),
         ),
+        _buildConnectionStateIndicator(),
         Padding(
           padding: const EdgeInsets.all(8),
           child: Row(
@@ -282,7 +315,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.graphic_eq),
-                color: _voiceService.isConnected.value ? Colors.green : null,
+                color: switch (_voiceService.connectionState.value) {
+                  VoiceConnectionState.connecting => Colors.orange,
+                  VoiceConnectionState.listening => Colors.green,
+                  VoiceConnectionState.thinking => Colors.amber,
+                  VoiceConnectionState.speaking => Colors.blue,
+                  VoiceConnectionState.error => Colors.red,
+                  VoiceConnectionState.disconnected => null,
+                },
                 onPressed: (_sessionId == null || _isFinished)
                     ? null
                     : _connectToRealtime,

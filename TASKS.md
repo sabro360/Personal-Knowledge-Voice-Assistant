@@ -740,7 +740,7 @@ Realtime eventを受信する。
 
 ---
 
-## T1306 Connection State管理
+## [x] T1306 Connection State管理
 
 State:
 
