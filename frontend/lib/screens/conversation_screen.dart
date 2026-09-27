@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
+import '../services/permission_service.dart';
 import '../services/session_service.dart';
 import '../services/utterance_service.dart';
 import 'knowledge_list_screen.dart';
@@ -25,7 +26,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
     _createSession();
+  }
+
+  Future<void> _requestPermissions() async {
+    await requestMicrophonePermission();
   }
 
   Future<void> _createSession() async {
