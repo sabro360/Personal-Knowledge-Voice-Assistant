@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../services/session_service.dart';
 import '../services/utterance_service.dart';
+import 'knowledge_list_screen.dart';
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
@@ -122,6 +123,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
       appBar: AppBar(
         title: const Text('会話'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.library_books),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const KnowledgeListScreen(),
+                ),
+              );
+            },
+          ),
           TextButton(
             onPressed: (_sessionId == null || _isFinished) ? null : _finishSession,
             child: const Text('終了'),
