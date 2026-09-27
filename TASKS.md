@@ -603,7 +603,7 @@ Knowledgeから元Sessionを開けるようにする。
 
 ---
 
-## T1002 Search API作成
+## [x] T1002 Search API作成
 
 GET:
 
