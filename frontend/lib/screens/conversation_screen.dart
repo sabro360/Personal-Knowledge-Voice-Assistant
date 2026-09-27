@@ -31,7 +31,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     super.initState();
     _voiceService.isRecording.addListener(_onVoiceStateChanged);
     _voiceService.isPlaying.addListener(_onVoiceStateChanged);
-    _voiceService.hasTrack.addListener(_onVoiceStateChanged);
+    _voiceService.isConnected.addListener(_onVoiceStateChanged);
     _requestPermissions();
     _createSession();
   }
@@ -61,7 +61,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   void dispose() {
     _voiceService.isRecording.removeListener(_onVoiceStateChanged);
     _voiceService.isPlaying.removeListener(_onVoiceStateChanged);
-    _voiceService.hasTrack.removeListener(_onVoiceStateChanged);
+    _voiceService.isConnected.removeListener(_onVoiceStateChanged);
     _voiceService.dispose();
     _textController.dispose();
     _scrollController.dispose();
@@ -100,19 +100,18 @@ class _ConversationScreenState extends State<ConversationScreen> {
     }
   }
 
-  Future<void> _testWebRtcTrack() async {
-    try {
-      final trackInfo = await _voiceService.acquireTrack();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('WebRTC audio track: $trackInfo')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('WebRTC audio track の取得に失敗しました')),
-        );
+  Future<void> _connectToRealtime() async {
+    if (_voiceService.isConnected.value) {
+      await _voiceService.disconnect();
+    } else {
+      try {
+        await _voiceService.connect();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Realtime API への接続に失敗しました')),
+          );
+        }
       }
     }
   }
@@ -283,10 +282,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.graphic_eq),
-                color: _voiceService.hasTrack.value ? Colors.green : null,
+                color: _voiceService.isConnected.value ? Colors.green : null,
                 onPressed: (_sessionId == null || _isFinished)
                     ? null
-                    : _testWebRtcTrack,
+                    : _connectToRealtime,
               ),
               IconButton(
                 onPressed: (_sessionId == null || _isFinished)

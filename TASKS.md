@@ -716,7 +716,7 @@ RealtimeVoiceService
 
 ---
 
-## T1302 WebRTC PeerConnection作成
+## T1302 WebRTC PeerConnection作成 [x]
 
 Realtime APIとのPeerConnectionを確立する。
 
