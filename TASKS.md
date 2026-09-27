@@ -644,7 +644,7 @@ FTS5 は日本語テキストに不適切なため見送り。将来は Vector S
 
 ---
 
-## T1101 Flutter microphone permission
+## T1101 Flutter microphone permission [x]
 
 AndroidのMicrophone permissionを設定する。
 
