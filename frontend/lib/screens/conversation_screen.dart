@@ -264,6 +264,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
               Expanded(
                 child: TextField(
                   controller: _textController,
+                  enabled: _sessionId != null && !_isFinished,
                   decoration: const InputDecoration(
                     hintText: 'メッセージを入力',
                     border: OutlineInputBorder(),
@@ -294,7 +295,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
                     : _testWebRtcTrack,
               ),
               IconButton(
-                onPressed: _sendMessage,
+                onPressed: (_sessionId == null || _isFinished)
+                    ? null
+                    : _sendMessage,
                 icon: const Icon(Icons.send),
               ),
             ],
