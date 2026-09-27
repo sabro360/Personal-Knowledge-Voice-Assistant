@@ -138,9 +138,9 @@ void main() {
       expect(service.connectionState.value, VoiceConnectionState.thinking);
     });
 
-    test('response.audio.delta event -> speaking', () async {
+    test('output_audio_buffer.started event -> speaking', () async {
       await service.connect();
-      fakeWebRtc.injectEvent('{"type":"response.audio.delta","delta":"abc"}');
+      fakeWebRtc.injectEvent('{"type":"output_audio_buffer.started"}');
       await Future<void>.delayed(Duration.zero);
       expect(service.connectionState.value, VoiceConnectionState.speaking);
     });

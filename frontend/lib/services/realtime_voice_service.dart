@@ -124,7 +124,7 @@ class RealtimeVoiceService {
       switch (type) {
         case 'response.created':
           connectionState.value = VoiceConnectionState.thinking;
-        case 'response.audio.delta':
+        case 'output_audio_buffer.started':
           connectionState.value = VoiceConnectionState.speaking;
         case 'response.done':
           connectionState.value = VoiceConnectionState.listening;
