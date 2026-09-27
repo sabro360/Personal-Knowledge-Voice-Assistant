@@ -678,7 +678,7 @@ Local audio trackを取得する。
 
 # Phase 12 - Realtime Backend Authentication
 
-## T1201 Realtime Credential API設計
+## T1201 Realtime Credential API設計 [x]
 
 FlutterにPermanent API Keyを渡さない構成にする。
 
