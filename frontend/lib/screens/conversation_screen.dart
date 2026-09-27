@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
+import '../services/audio_recorder_service.dart';
 import '../services/permission_service.dart';
 import '../services/session_service.dart';
 import '../services/utterance_service.dart';
@@ -17,6 +18,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final List<Message> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  final AudioRecorderService _audioRecorderService = AudioRecorderService();
+  bool _isRecording = false;
 
   int? _sessionId;
   bool _isLoadingSession = true;
@@ -51,9 +55,28 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   void dispose() {
+    _audioRecorderService.dispose();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      await _audioRecorderService.stop();
+      if (mounted) setState(() => _isRecording = false);
+    } else {
+      try {
+        await _audioRecorderService.start();
+        if (mounted) setState(() => _isRecording = true);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('マイクを開始できませんでした')),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _sendMessage() async {
@@ -201,6 +224,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 ),
               ),
               const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(_isRecording ? Icons.stop_circle : Icons.mic),
+                color: _isRecording ? Colors.red : null,
+                onPressed: (_sessionId == null || _isFinished)
+                    ? null
+                    : _toggleRecording,
+              ),
               IconButton(
                 onPressed: _sendMessage,
                 icon: const Icon(Icons.send),
