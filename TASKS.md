@@ -684,7 +684,7 @@ FlutterにPermanent API Keyを渡さない構成にする。
 
 ---
 
-## T1202 Ephemeral credential endpoint作成
+## T1202 Ephemeral credential endpoint作成 [x]
 
 例:
 
