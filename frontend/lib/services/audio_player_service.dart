@@ -4,6 +4,15 @@ import 'package:audioplayers/audioplayers.dart';
 class AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
 
+  /// Called when playback completes naturally.
+  void Function()? onComplete;
+
+  AudioPlayerService() {
+    _player.onPlayerComplete.listen((_) {
+      onComplete?.call();
+    });
+  }
+
   /// Plays the bundled test beep sound.
   Future<void> playTestBeep() async {
     await _player.play(AssetSource('test_beep.wav'));

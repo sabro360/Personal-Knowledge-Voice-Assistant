@@ -24,7 +24,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final AudioRecorderService _audioRecorderService = AudioRecorderService();
   bool _isRecording = false;
 
-  final AudioPlayerService _audioPlayerService = AudioPlayerService();
+  late final AudioPlayerService _audioPlayerService;
   bool _isPlaying = false;
 
   final WebRtcService _webRtcService = WebRtcService();
@@ -38,6 +38,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
+    _audioPlayerService = AudioPlayerService()
+      ..onComplete = () {
+        if (mounted) setState(() => _isPlaying = false);
+      };
     _requestPermissions();
     _createSession();
   }
