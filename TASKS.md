@@ -664,7 +664,7 @@ Flutterから音声を再生できることを確認する。
 
 ---
 
-## T1104 flutter_webrtc導入
+## T1104 flutter_webrtc導入 [x]
 
 WebRTC dependencyを追加する。
 
