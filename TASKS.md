@@ -658,7 +658,7 @@ AndroidのMicrophone permissionを設定する。
 
 ---
 
-## T1103 Audio output確認
+## T1103 Audio output確認 [x]
 
 Flutterから音声を再生できることを確認する。
 
