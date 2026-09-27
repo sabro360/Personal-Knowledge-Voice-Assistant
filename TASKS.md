@@ -650,7 +650,7 @@ AndroidのMicrophone permissionを設定する。
 
 ---
 
-## T1102 Audio input確認
+## T1102 Audio input確認 [x]
 
 マイクから音声を取得できることを確認する。
 
