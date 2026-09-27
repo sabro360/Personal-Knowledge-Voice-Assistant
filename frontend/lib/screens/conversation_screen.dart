@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
+import '../services/audio_player_service.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/permission_service.dart';
 import '../services/session_service.dart';
@@ -21,6 +22,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   final AudioRecorderService _audioRecorderService = AudioRecorderService();
   bool _isRecording = false;
+
+  final AudioPlayerService _audioPlayerService = AudioPlayerService();
+  bool _isPlaying = false;
 
   int? _sessionId;
   bool _isLoadingSession = true;
@@ -56,9 +60,28 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void dispose() {
     _audioRecorderService.dispose();
+    _audioPlayerService.dispose();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _togglePlayback() async {
+    if (_isPlaying) {
+      await _audioPlayerService.stop();
+      if (mounted) setState(() => _isPlaying = false);
+    } else {
+      try {
+        await _audioPlayerService.playTestBeep();
+        if (mounted) setState(() => _isPlaying = true);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('音声を再生できませんでした')),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _toggleRecording() async {
@@ -224,6 +247,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 ),
               ),
               const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(_isPlaying ? Icons.stop_circle : Icons.volume_up),
+                color: _isPlaying ? Colors.blue : null,
+                onPressed: (_sessionId == null || _isFinished)
+                    ? null
+                    : _togglePlayback,
+              ),
               IconButton(
                 icon: Icon(_isRecording ? Icons.stop_circle : Icons.mic),
                 color: _isRecording ? Colors.red : null,
