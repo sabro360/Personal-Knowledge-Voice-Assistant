@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/knowledge.dart';
 import '../services/knowledge_service.dart';
 import 'knowledge_detail_screen.dart';
+import 'knowledge_search_screen.dart';
 
 class KnowledgeListScreen extends StatefulWidget {
   const KnowledgeListScreen({super.key});
@@ -48,7 +49,22 @@ class _KnowledgeListScreenState extends State<KnowledgeListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ナレッジ一覧')),
+      appBar: AppBar(
+        title: const Text('ナレッジ一覧'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const KnowledgeSearchScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: _buildBody(),
     );
   }

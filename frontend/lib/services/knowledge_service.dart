@@ -17,3 +17,15 @@ Future<Knowledge> fetchKnowledgeDetail(int id) async {
   final result = await client.get('/knowledge/$id') as Map<String, dynamic>;
   return Knowledge.fromJson(result);
 }
+
+/// Calls GET /knowledge/search?q={q} and returns matching knowledge items.
+Future<List<Knowledge>> fetchKnowledgeSearch(String q) async {
+  final client = ApiClient();
+  final result = await client.get(
+        '/knowledge/search?q=${Uri.encodeQueryComponent(q)}',
+      ) as List<dynamic>;
+  return result
+      .cast<Map<String, dynamic>>()
+      .map(Knowledge.fromJson)
+      .toList();
+}
