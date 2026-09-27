@@ -734,7 +734,7 @@ AI response audioを再生する。
 
 ---
 
-## T1305 DataChannel作成
+## T1305 DataChannel作成 [x]
 
 Realtime eventを受信する。
 

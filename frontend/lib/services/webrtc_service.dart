@@ -10,6 +10,12 @@ import 'package:http/http.dart' as http;
 class WebRtcService {
   MediaStream? _localStream;
   RTCPeerConnection? _peerConnection;
+  RTCDataChannel? _dataChannel;
+  final _eventsController = StreamController<String>.broadcast();
+
+  /// Stream of raw JSON event strings received from the OpenAI Realtime API
+  /// via the 'oai-events' DataChannel.
+  Stream<String> get events => _eventsController.stream;
 
   // OpenAI Realtime API SDP endpoint (WebRTC offer/answer exchange)
   static const _sdpEndpoint = 'https://api.openai.com/v1/realtime/calls';
@@ -60,6 +66,16 @@ class WebRtcService {
     });
     _peerConnection = pc;
 
+    // Create DataChannel for Realtime events before createOffer so it
+    // is included in the SDP offer sent to OpenAI.
+    _dataChannel = await pc.createDataChannel(
+      'oai-events',
+      RTCDataChannelInit(),
+    );
+    _dataChannel!.onMessage = (RTCDataChannelMessage message) {
+      if (!message.isBinary) _eventsController.add(message.text);
+    };
+
     // Add the microphone track with sendrecv direction.
     await pc.addTransceiver(
       track: track,
@@ -85,6 +101,8 @@ class WebRtcService {
 
   /// Closes the PeerConnection.
   Future<void> disconnect() async {
+    _dataChannel?.close();
+    _dataChannel = null;
     await _peerConnection?.close();
     _peerConnection = null;
   }
@@ -93,6 +111,7 @@ class WebRtcService {
   Future<void> dispose() async {
     await disconnect();
     await stop();
+    await _eventsController.close();
   }
 
   Future<void> _waitForIceGathering(RTCPeerConnection pc) async {
