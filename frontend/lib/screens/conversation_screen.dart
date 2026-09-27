@@ -6,6 +6,7 @@ import '../services/audio_recorder_service.dart';
 import '../services/permission_service.dart';
 import '../services/session_service.dart';
 import '../services/utterance_service.dart';
+import '../services/webrtc_service.dart';
 import 'knowledge_list_screen.dart';
 
 class ConversationScreen extends StatefulWidget {
@@ -25,6 +26,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   final AudioPlayerService _audioPlayerService = AudioPlayerService();
   bool _isPlaying = false;
+
+  final WebRtcService _webRtcService = WebRtcService();
+  bool _hasWebRtcTrack = false;
 
   int? _sessionId;
   bool _isLoadingSession = true;
@@ -61,6 +65,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   void dispose() {
     _audioRecorderService.dispose();
     _audioPlayerService.dispose();
+    _webRtcService.dispose();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -98,6 +103,26 @@ class _ConversationScreenState extends State<ConversationScreen> {
             const SnackBar(content: Text('マイクを開始できませんでした')),
           );
         }
+      }
+    }
+  }
+
+  Future<void> _testWebRtcTrack() async {
+    try {
+      final track = await _webRtcService.getLocalAudioTrack();
+      if (mounted) {
+        setState(() => _hasWebRtcTrack = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('WebRTC audio track: ${track.kind} / ${track.id}')),
+        );
+      }
+      await _webRtcService.stop();
+      if (mounted) setState(() => _hasWebRtcTrack = false);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('WebRTC audio track の取得に失敗しました')),
+        );
       }
     }
   }
@@ -260,6 +285,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 onPressed: (_sessionId == null || _isFinished)
                     ? null
                     : _toggleRecording,
+              ),
+              IconButton(
+                icon: const Icon(Icons.graphic_eq),
+                color: _hasWebRtcTrack ? Colors.green : null,
+                onPressed: (_sessionId == null || _isFinished)
+                    ? null
+                    : _testWebRtcTrack,
               ),
               IconButton(
                 onPressed: _sendMessage,
