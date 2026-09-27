@@ -590,7 +590,7 @@ Knowledgeから元Sessionを開けるようにする。
 
 # Phase 10 - Search
 
-## T1001 Simple text search実装
+## [x] T1001 Simple text search実装
 
 まずLIKE等の単純検索でよい。
 
