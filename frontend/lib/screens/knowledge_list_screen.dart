@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/knowledge.dart';
 import '../services/knowledge_service.dart';
+import 'knowledge_detail_screen.dart';
 
 class KnowledgeListScreen extends StatefulWidget {
   const KnowledgeListScreen({super.key});
@@ -71,6 +72,15 @@ class _KnowledgeListScreenState extends State<KnowledgeListScreen> {
           subtitle: Text(
             '${item.category ?? '未分類'}  ·  ${_formatDate(item.createdAt)}',
           ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    KnowledgeDetailScreen(knowledgeId: item.id),
+              ),
+            );
+          },
         );
       },
     );

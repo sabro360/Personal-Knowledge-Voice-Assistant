@@ -18,6 +18,19 @@ def test_get_knowledge_returns_200_with_correct_data() -> None:
     assert data["session_id"] == session["id"]
 
 
+def test_get_knowledge_includes_keywords_field() -> None:
+    """GET /knowledge/{id} should include a keywords list in the response."""
+    session = client.post("/sessions").json()
+    knowledge = client.post(f"/sessions/{session['id']}/knowledge").json()
+
+    response = client.get(f"/knowledge/{knowledge['id']}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "keywords" in data
+    assert isinstance(data["keywords"], list)
+
+
 def test_get_knowledge_returns_404_for_nonexistent_id() -> None:
     """GET /knowledge/{id} should return 404 when the knowledge item does not exist."""
     response = client.get("/knowledge/999999")

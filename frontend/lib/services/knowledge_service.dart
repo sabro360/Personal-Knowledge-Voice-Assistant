@@ -10,3 +10,10 @@ Future<List<Knowledge>> fetchKnowledgeList() async {
       .map(Knowledge.fromJson)
       .toList();
 }
+
+/// Calls GET /knowledge/{id} and returns a single knowledge item with keywords.
+Future<Knowledge> fetchKnowledgeDetail(int id) async {
+  final client = ApiClient();
+  final result = await client.get('/knowledge/$id') as Map<String, dynamic>;
+  return Knowledge.fromJson(result);
+}
