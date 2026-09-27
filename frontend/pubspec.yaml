@@ -39,6 +39,7 @@ dependencies:
   permission_handler: ^11.0.1
   record: ^5.0.5
   audioplayers: ^5.0.0
+  flutter_webrtc: ^0.9.48+hotfix.1
 
 dev_dependencies:
   flutter_test:
