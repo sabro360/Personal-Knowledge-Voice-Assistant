@@ -145,7 +145,16 @@ void main() {
       expect(service.connectionState.value, VoiceConnectionState.speaking);
     });
 
-    test('response.done event -> listening', () async {
+    test('output_audio_buffer.stopped event -> listening', () async {
+      await service.connect();
+      fakeWebRtc.injectEvent('{"type":"response.created"}');
+      fakeWebRtc.injectEvent('{"type":"output_audio_buffer.started"}');
+      fakeWebRtc.injectEvent('{"type":"output_audio_buffer.stopped"}');
+      await Future<void>.delayed(Duration.zero);
+      expect(service.connectionState.value, VoiceConnectionState.listening);
+    });
+
+    test('response.done fallback -> listening when thinking', () async {
       await service.connect();
       fakeWebRtc.injectEvent('{"type":"response.created"}');
       fakeWebRtc.injectEvent('{"type":"response.done"}');
@@ -185,49 +194,58 @@ void main() {
 
     tearDown(() => service.dispose());
 
-    test('conversation.item.done with role=user emits transcript', () async {
+    test('input_audio_transcription.completed emits transcript', () async {
       await service.connect();
       final transcripts = <String>[];
       service.userTranscripts.listen(transcripts.add);
 
       fakeWebRtc.injectEvent('{'
-          '"type":"conversation.item.done",'
-          '"item":{"role":"user","content":[{"type":"input_audio","transcript":"こんにちは"}]}'
+          '"type":"conversation.item.input_audio_transcription.completed",'
+          '"item_id":"item_123",'
+          '"content_index":0,'
+          '"transcript":"こんにちは"'
           '}');
       await Future<void>.delayed(Duration.zero);
 
       expect(transcripts, ['こんにちは']);
     });
 
-    test('conversation.item.done with role=assistant is ignored', () async {
+    test('input_audio_transcription.completed with empty transcript is ignored',
+        () async {
       await service.connect();
       final transcripts = <String>[];
       service.userTranscripts.listen(transcripts.add);
 
       fakeWebRtc.injectEvent('{'
-          '"type":"conversation.item.done",'
-          '"item":{"role":"assistant","content":[{"type":"audio","transcript":"AIの返答"}]}'
+          '"type":"conversation.item.input_audio_transcription.completed",'
+          '"item_id":"item_123",'
+          '"content_index":0,'
+          '"transcript":""'
           '}');
       await Future<void>.delayed(Duration.zero);
 
       expect(transcripts, isEmpty);
     });
 
-    test('conversation.item.done with empty transcript is ignored', () async {
+    test('input_audio_transcription.completed with null transcript is ignored',
+        () async {
       await service.connect();
       final transcripts = <String>[];
       service.userTranscripts.listen(transcripts.add);
 
       fakeWebRtc.injectEvent('{'
-          '"type":"conversation.item.done",'
-          '"item":{"role":"user","content":[{"type":"input_audio","transcript":""}]}'
+          '"type":"conversation.item.input_audio_transcription.completed",'
+          '"item_id":"item_123",'
+          '"content_index":0,'
+          '"transcript":null'
           '}');
       await Future<void>.delayed(Duration.zero);
 
       expect(transcripts, isEmpty);
     });
 
-    test('conversation.item.done with null transcript is ignored', () async {
+    test('conversation.item.done does not emit transcript (transcript is null)',
+        () async {
       await service.connect();
       final transcripts = <String>[];
       service.userTranscripts.listen(transcripts.add);
@@ -235,20 +253,6 @@ void main() {
       fakeWebRtc.injectEvent('{'
           '"type":"conversation.item.done",'
           '"item":{"role":"user","content":[{"type":"input_audio","transcript":null}]}'
-          '}');
-      await Future<void>.delayed(Duration.zero);
-
-      expect(transcripts, isEmpty);
-    });
-
-    test('conversation.item.done with missing content is ignored', () async {
-      await service.connect();
-      final transcripts = <String>[];
-      service.userTranscripts.listen(transcripts.add);
-
-      fakeWebRtc.injectEvent('{'
-          '"type":"conversation.item.done",'
-          '"item":{"role":"user"}'
           '}');
       await Future<void>.delayed(Duration.zero);
 

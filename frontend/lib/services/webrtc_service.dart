@@ -99,6 +99,15 @@ class WebRtcService {
     await Helper.setSpeakerphoneOn(true);
   }
 
+  /// Sends a JSON string message via the 'oai-events' DataChannel.
+  ///
+  /// No-op if the DataChannel is not available.
+  Future<void> sendMessage(String json) async {
+    final dc = _dataChannel;
+    if (dc == null) return;
+    await dc.send(RTCDataChannelMessage(json));
+  }
+
   /// Closes the PeerConnection.
   Future<void> disconnect() async {
     _dataChannel?.close();

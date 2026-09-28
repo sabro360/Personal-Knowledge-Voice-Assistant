@@ -127,24 +127,42 @@ class RealtimeVoiceService {
       final event = jsonDecode(json) as Map<String, dynamic>;
       final type = event['type'] as String? ?? '';
       switch (type) {
+        case 'session.created':
+          // Enable user speech transcription as soon as the session is ready.
+          // In the GA Realtime API (gpt-realtime-2.1), transcription is configured
+          // under session.audio.input.transcription (not input_audio_transcription).
+          _webRtcService.sendMessage(jsonEncode({
+            'type': 'session.update',
+            'session': {
+              'type': 'realtime',
+              'audio': {
+                'input': {
+                  'transcription': {
+                    'model': 'gpt-4o-transcribe',
+                    'language': 'ja',
+                  },
+                },
+              },
+            },
+          }));
         case 'response.created':
           connectionState.value = VoiceConnectionState.thinking;
         case 'output_audio_buffer.started':
           connectionState.value = VoiceConnectionState.speaking;
-        case 'response.done':
+        case 'output_audio_buffer.stopped':
           connectionState.value = VoiceConnectionState.listening;
+        case 'response.done':
+          // Fallback: transition to listening when no audio was generated
+          // (e.g. text-only response). No-op if already listening.
+          if (connectionState.value != VoiceConnectionState.listening) {
+            connectionState.value = VoiceConnectionState.listening;
+          }
         case 'error':
           connectionState.value = VoiceConnectionState.error;
-        case 'conversation.item.done':
-          final item = event['item'] as Map<String, dynamic>?;
-          if (item == null) break;
-          final role = item['role'] as String?;
-          if (role != 'user') break;
-          final content = item['content'] as List<dynamic>?;
-          if (content == null || content.isEmpty) break;
-          final firstContent = content[0] as Map<String, dynamic>?;
-          if (firstContent == null) break;
-          final transcript = firstContent['transcript'] as String?;
+        case 'conversation.item.input_audio_transcription.completed':
+          // User speech transcription arrives here (asynchronously after
+          // conversation.item.done, which always has transcript=null).
+          final transcript = event['transcript'] as String?;
           if (transcript == null || transcript.isEmpty) break;
           _userTranscriptController.add(transcript);
       }
