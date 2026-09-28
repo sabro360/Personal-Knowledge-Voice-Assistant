@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
@@ -21,6 +23,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final ScrollController _scrollController = ScrollController();
 
   final RealtimeVoiceService _voiceService = RealtimeVoiceService();
+  StreamSubscription<String>? _userTranscriptSubscription;
 
   int? _sessionId;
   bool _isLoadingSession = true;
@@ -34,11 +37,22 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _voiceService.isPlaying.addListener(_onVoiceStateChanged);
     _voiceService.isConnected.addListener(_onVoiceStateChanged);
     _voiceService.connectionState.addListener(_onVoiceStateChanged);
+    _userTranscriptSubscription =
+        _voiceService.userTranscripts.listen(_onUserTranscript);
     _requestPermissions();
     _createSession();
   }
 
   void _onVoiceStateChanged() => setState(() {});
+
+  Future<void> _onUserTranscript(String transcript) async {
+    if (_sessionId == null || _isFinished) return;
+    try {
+      await addUtterance(_sessionId!, 'user', transcript);
+    } catch (_) {
+      // 保存失敗は会話を中断させない
+    }
+  }
 
   Future<void> _requestPermissions() async {
     await requestMicrophonePermission();
@@ -65,6 +79,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _voiceService.isPlaying.removeListener(_onVoiceStateChanged);
     _voiceService.isConnected.removeListener(_onVoiceStateChanged);
     _voiceService.connectionState.removeListener(_onVoiceStateChanged);
+    _userTranscriptSubscription?.cancel();
     _voiceService.dispose();
     _textController.dispose();
     _scrollController.dispose();

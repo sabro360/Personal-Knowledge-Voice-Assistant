@@ -761,7 +761,7 @@ Realtime APIからUser transcriptを取得する。
 
 ---
 
-## T1402 User transcript保存
+## [x] T1402 User transcript保存
 
 UtteranceとしてBackendへ保存する。
 
