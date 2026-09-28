@@ -21,6 +21,7 @@ class RealtimeVoiceService {
   final ApiClient _apiClient;
 
   StreamSubscription<String>? _eventsSubscription;
+  final _userTranscriptController = StreamController<String>.broadcast();
 
   /// Whether the microphone is currently recording.
   final ValueNotifier<bool> isRecording = ValueNotifier(false);
@@ -34,6 +35,9 @@ class RealtimeVoiceService {
   /// Current state of the Realtime API connection.
   final ValueNotifier<VoiceConnectionState> connectionState =
       ValueNotifier(VoiceConnectionState.disconnected);
+
+  /// Stream of user speech transcripts received from the Realtime API.
+  Stream<String> get userTranscripts => _userTranscriptController.stream;
 
   RealtimeVoiceService({
     AudioRecorderService? recorder,
@@ -108,6 +112,7 @@ class RealtimeVoiceService {
   /// Releases all underlying service resources.
   void dispose() {
     _eventsSubscription?.cancel();
+    _userTranscriptController.close();
     _recorder.dispose();
     _player.dispose();
     _webRtcService.dispose();
@@ -130,6 +135,18 @@ class RealtimeVoiceService {
           connectionState.value = VoiceConnectionState.listening;
         case 'error':
           connectionState.value = VoiceConnectionState.error;
+        case 'conversation.item.done':
+          final item = event['item'] as Map<String, dynamic>?;
+          if (item == null) break;
+          final role = item['role'] as String?;
+          if (role != 'user') break;
+          final content = item['content'] as List<dynamic>?;
+          if (content == null || content.isEmpty) break;
+          final firstContent = content[0] as Map<String, dynamic>?;
+          if (firstContent == null) break;
+          final transcript = firstContent['transcript'] as String?;
+          if (transcript == null || transcript.isEmpty) break;
+          _userTranscriptController.add(transcript);
       }
     } catch (_) {
       // Ignore malformed events.

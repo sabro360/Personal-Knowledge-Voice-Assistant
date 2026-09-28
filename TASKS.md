@@ -755,7 +755,7 @@ State:
 
 # Phase 14 - Voice Conversation Persistence
 
-## T1401 User transcript取得
+## [x] T1401 User transcript取得
 
 Realtime APIからUser transcriptを取得する。
 

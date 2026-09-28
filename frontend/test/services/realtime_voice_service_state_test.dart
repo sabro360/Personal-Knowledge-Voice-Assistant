@@ -168,4 +168,91 @@ void main() {
       expect(service.connectionState.value, VoiceConnectionState.listening);
     });
   });
+
+  group('RealtimeVoiceService userTranscripts', () {
+    late ControllableWebRtcService fakeWebRtc;
+    late RealtimeVoiceService service;
+
+    setUp(() {
+      fakeWebRtc = ControllableWebRtcService();
+      service = RealtimeVoiceService(
+        recorder: FakeRecorder(),
+        player: FakePlayer(),
+        webRtcService: fakeWebRtc,
+        apiClient: FakeApiClient(),
+      );
+    });
+
+    tearDown(() => service.dispose());
+
+    test('conversation.item.done with role=user emits transcript', () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.userTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"conversation.item.done",'
+          '"item":{"role":"user","content":[{"type":"input_audio","transcript":"こんにちは"}]}'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, ['こんにちは']);
+    });
+
+    test('conversation.item.done with role=assistant is ignored', () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.userTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"conversation.item.done",'
+          '"item":{"role":"assistant","content":[{"type":"audio","transcript":"AIの返答"}]}'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, isEmpty);
+    });
+
+    test('conversation.item.done with empty transcript is ignored', () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.userTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"conversation.item.done",'
+          '"item":{"role":"user","content":[{"type":"input_audio","transcript":""}]}'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, isEmpty);
+    });
+
+    test('conversation.item.done with null transcript is ignored', () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.userTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"conversation.item.done",'
+          '"item":{"role":"user","content":[{"type":"input_audio","transcript":null}]}'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, isEmpty);
+    });
+
+    test('conversation.item.done with missing content is ignored', () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.userTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"conversation.item.done",'
+          '"item":{"role":"user"}'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, isEmpty);
+    });
+  });
 }
