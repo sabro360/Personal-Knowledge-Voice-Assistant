@@ -29,6 +29,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
   bool _isLoadingSession = true;
   String? _sessionError;
   bool _isFinished = false;
+  bool _isFinishing = false;
 
   @override
   void initState() {
@@ -77,6 +78,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
   }
 
   Future<void> _finishSession() async {
+    setState(() { _isFinishing = true; });
     // 1. WebRTC切断（接続中のみ、失敗しても続行する）
     if (_voiceService.isConnected.value) {
       try {
@@ -91,6 +93,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
       if (mounted) {
         setState(() {
           _isFinished = true;
+          _isFinishing = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('会話を終了しました')),
@@ -98,6 +101,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() { _isFinishing = false; });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('会話の終了に失敗しました')),
         );
@@ -144,7 +148,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
             },
           ),
           TextButton(
-            onPressed: (_sessionId == null || _isFinished) ? null : _finishSession,
+            onPressed: (_sessionId == null || _isFinished || _isFinishing) ? null : _finishSession,
             child: const Text('終了'),
           ),
         ],
@@ -217,6 +221,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
 
     final bool canStart = _sessionId != null &&
         !_isFinished &&
+        !_isFinishing &&
         state == VoiceConnectionState.disconnected;
     return Center(
       child: ElevatedButton(
