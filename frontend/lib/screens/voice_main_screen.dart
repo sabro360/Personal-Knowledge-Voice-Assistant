@@ -169,6 +169,19 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
       );
     }
 
+    if (state == VoiceConnectionState.error) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red),
+            SizedBox(height: 16),
+            Text('エラーが発生しました', style: TextStyle(fontSize: 20, color: Colors.red)),
+          ],
+        ),
+      );
+    }
+
     final bool canStart = _sessionId != null &&
         !_isFinished &&
         state == VoiceConnectionState.disconnected;
