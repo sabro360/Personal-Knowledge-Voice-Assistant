@@ -143,6 +143,19 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
       );
     }
 
+    if (state == VoiceConnectionState.thinking) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: Colors.amber),
+            SizedBox(height: 16),
+            Text('Thinking', style: TextStyle(fontSize: 20, color: Colors.amber)),
+          ],
+        ),
+      );
+    }
+
     final bool canStart = _sessionId != null &&
         !_isFinished &&
         state == VoiceConnectionState.disconnected;

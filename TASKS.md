@@ -815,7 +815,7 @@ Button:
 
 ---
 
-## T1503 Thinking表示
+## [x] T1503 Thinking表示
 
 AI処理中状態を表示する。
 
