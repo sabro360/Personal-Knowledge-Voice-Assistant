@@ -841,21 +841,31 @@ AI発話中状態を表示する。
 
 # Phase 16 - Voice UX Improvement
 
-## T1601 VAD挙動確認
+## [x] T1601 VAD挙動確認
 
 Realtime API標準VADの挙動を確認する。
 
+確認結果:
+- A. ターン切り替え: 約1秒（デフォルト動作、問題なし）
+- B. 短いポーズ: 誤検知なし
+- C. Barge-in: AI発話中の割り込み動作OK
+- D. 環境ノイズ: 大きい音楽レベルでも誤発火なし
+
 ---
 
-## T1602 Silence threshold調整
+## [x] T1602 Silence threshold調整
 
 必要に応じてTurn Detection設定を調整する。
 
+T1601の結果が問題なしのためスキップ。
+
 ---
 
-## T1603 Barge-in確認
+## [x] T1603 Barge-in確認
 
 AI発話途中にUserが発話した場合の動作を確認する。
+
+T1601シナリオCで確認済み。AI発話中の割り込み動作OK。
 
 ---
 
