@@ -154,6 +154,13 @@ class RealtimeVoiceService {
           connectionState.value = VoiceConnectionState.thinking;
         case 'output_audio_buffer.started':
           connectionState.value = VoiceConnectionState.speaking;
+        case 'input_audio_buffer.speech_started':
+          // Barge-in: ユーザーが AI 発話中に話し始めた。
+          // speaking 中のみ即座に listening へ遷移し、割り込みを UI へ反映する。
+          // listening / thinking 中は no-op（通常の発話開始なので状態変更不要）。
+          if (connectionState.value == VoiceConnectionState.speaking) {
+            connectionState.value = VoiceConnectionState.listening;
+          }
         case 'output_audio_buffer.stopped':
           connectionState.value = VoiceConnectionState.listening;
         case 'response.done':
