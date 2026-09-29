@@ -1,4 +1,5 @@
 from app.providers.dummy_knowledge_model import DummyKnowledgeModel
+from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 
 
 def test_summarize_conversation_returns_fixed_string() -> None:
@@ -44,3 +45,17 @@ def test_generate_title_returns_fixed_string() -> None:
 
     assert isinstance(result, str)
     assert result == "dummy title"
+
+
+def test_extract_knowledge_returns_knowledge_extraction() -> None:
+    """extract_knowledge() should return a KnowledgeExtraction with all expected fields."""
+    model = DummyKnowledgeModel()
+    result = model.extract_knowledge([])
+
+    assert isinstance(result, KnowledgeExtraction)
+    assert result.title == "dummy title"
+    assert result.question == "dummy question"
+    assert result.summary == "dummy summary"
+    assert result.answer == "dummy answer"
+    assert result.category == "dummy category"
+    assert result.keywords == ["dummy keyword"]

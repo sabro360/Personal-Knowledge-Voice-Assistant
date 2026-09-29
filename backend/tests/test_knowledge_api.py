@@ -62,6 +62,9 @@ def test_generate_knowledge_returns_502_on_extraction_error() -> None:
         def generate_title(self, utterances):
             raise KnowledgeExtractionError("fail")
 
+        def extract_knowledge(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
     app.dependency_overrides[get_knowledge_model] = lambda: FailingModel()
     session = client.post("/sessions").json()
 
@@ -88,6 +91,9 @@ def test_finish_session_succeeds_even_if_knowledge_extraction_fails() -> None:
             raise KnowledgeExtractionError("fail")
 
         def generate_title(self, utterances):
+            raise KnowledgeExtractionError("fail")
+
+        def extract_knowledge(self, utterances):
             raise KnowledgeExtractionError("fail")
 
     app.dependency_overrides[get_knowledge_model] = lambda: FailingModel()

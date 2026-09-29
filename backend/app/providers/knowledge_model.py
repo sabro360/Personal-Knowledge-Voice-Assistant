@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from app.models.utterance import Utterance
+from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 
 
 class KnowledgeModel(Protocol):
@@ -24,4 +25,8 @@ class KnowledgeModel(Protocol):
 
     def generate_title(self, utterances: list[Utterance]) -> str:
         """Generate a concise title for the knowledge item."""
+        ...
+
+    def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
+        """Extract all knowledge fields in a single call."""
         ...

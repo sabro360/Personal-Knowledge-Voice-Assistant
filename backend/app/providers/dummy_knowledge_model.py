@@ -1,4 +1,5 @@
 from app.models.utterance import Utterance
+from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 
 
 class DummyKnowledgeModel:
@@ -23,3 +24,14 @@ class DummyKnowledgeModel:
     def generate_title(self, utterances: list[Utterance]) -> str:
         """Return a fixed title string regardless of utterances."""
         return "dummy title"
+
+    def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
+        """Return a fixed KnowledgeExtraction for testing."""
+        return KnowledgeExtraction(
+            title="dummy title",
+            question="dummy question",
+            summary="dummy summary",
+            answer="dummy answer",
+            category="dummy category",
+            keywords=["dummy keyword"],
+        )

@@ -79,3 +79,7 @@ class OpenAIKnowledgeModel:
     def generate_title(self, utterances: list[Utterance]) -> str:
         """Generate a concise title for the knowledge item."""
         return self._extract_all(utterances).title
+
+    def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
+        """Extract all knowledge fields in a single API call."""
+        return self._extract_all(utterances)

@@ -883,7 +883,7 @@ AI音声停止とUser発話開始を正しくUIへ反映する。
 
 # Phase 17 - Knowledge from Voice
 
-## T1701 Voice conversationからKnowledge生成
+## [x] T1701 Voice conversationからKnowledge生成
 
 実際の音声ConversationをKnowledgeへ変換する。
 

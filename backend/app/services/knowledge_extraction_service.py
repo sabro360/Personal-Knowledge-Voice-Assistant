@@ -27,27 +27,21 @@ class KnowledgeExtractionService:
     def extract(self, session_id: int, utterances: list[Utterance]) -> Knowledge:
         """Extract knowledge from utterances and persist as Knowledge with associated keywords.
 
-        Calls the KnowledgeModel to generate title, question, summary, and category,
-        then persists a Knowledge record. Keywords are extracted and associated via
-        KnowledgeKeyword. Returns the persisted Knowledge.
+        Calls the KnowledgeModel once to generate all fields, then persists a Knowledge
+        record. Keywords are extracted and associated via KnowledgeKeyword. Returns the
+        persisted Knowledge.
         """
-        title = self._model.generate_title(utterances)
-        questions = self._model.extract_questions(utterances)
-        summary = self._model.summarize_conversation(utterances)
-        category = self._model.classify_category(utterances)
-        keyword_names = self._model.extract_keywords(utterances)
-
-        question = questions[0] if questions else None
+        extraction = self._model.extract_knowledge(utterances)
 
         knowledge = self._knowledge_repo.create(
             session_id=session_id,
-            title=title,
-            question=question,
-            summary=summary,
-            category=category,
+            title=extraction.title,
+            question=extraction.question,
+            summary=extraction.summary,
+            category=extraction.category,
         )
 
-        for name in keyword_names:
+        for name in extraction.keywords:
             kw = self._keyword_repo.get_or_create(name)
             self._db.add(KnowledgeKeyword(knowledge_id=knowledge.id, keyword_id=kw.id))
         self._db.commit()

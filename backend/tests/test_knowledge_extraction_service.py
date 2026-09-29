@@ -8,6 +8,7 @@ from app.db.database import Base
 from app.models.conversation_session import ConversationSession
 from app.models.utterance import Utterance
 from app.providers.dummy_knowledge_model import DummyKnowledgeModel
+from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 from app.repositories.keyword_repository import KeywordRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
 from app.services.knowledge_extraction_service import KnowledgeExtractionService
@@ -93,6 +94,16 @@ def test_extract_sets_question_to_none_when_no_questions() -> None:
 
         def generate_title(self, utterances: list[Utterance]) -> str:
             return "t"
+
+        def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
+            return KnowledgeExtraction(
+                title="t",
+                question=None,
+                summary="s",
+                answer="",
+                category="c",
+                keywords=[],
+            )
 
     with Session(_make_engine()) as db:
         cs = ConversationSession(started_at=datetime.now(timezone.utc))
