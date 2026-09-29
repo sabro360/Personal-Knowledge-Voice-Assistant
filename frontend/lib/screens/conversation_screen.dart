@@ -24,6 +24,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   final RealtimeVoiceService _voiceService = RealtimeVoiceService();
   StreamSubscription<String>? _userTranscriptSubscription;
+  StreamSubscription<String>? _assistantTranscriptSubscription;
 
   int? _sessionId;
   bool _isLoadingSession = true;
@@ -39,6 +40,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _voiceService.connectionState.addListener(_onVoiceStateChanged);
     _userTranscriptSubscription =
         _voiceService.userTranscripts.listen(_onUserTranscript);
+    _assistantTranscriptSubscription =
+        _voiceService.assistantTranscripts.listen(_onAssistantTranscript);
     _requestPermissions();
     _createSession();
   }
@@ -49,6 +52,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
     if (_sessionId == null || _isFinished) return;
     try {
       await addUtterance(_sessionId!, 'user', transcript);
+    } catch (_) {
+      // 保存失敗は会話を中断させない
+    }
+  }
+
+  Future<void> _onAssistantTranscript(String transcript) async {
+    if (_sessionId == null || _isFinished) return;
+    try {
+      await addUtterance(_sessionId!, 'assistant', transcript);
     } catch (_) {
       // 保存失敗は会話を中断させない
     }
@@ -80,6 +92,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _voiceService.isConnected.removeListener(_onVoiceStateChanged);
     _voiceService.connectionState.removeListener(_onVoiceStateChanged);
     _userTranscriptSubscription?.cancel();
+    _assistantTranscriptSubscription?.cancel();
     _voiceService.dispose();
     _textController.dispose();
     _scrollController.dispose();

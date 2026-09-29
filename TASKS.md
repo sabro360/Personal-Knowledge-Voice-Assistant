@@ -773,7 +773,7 @@ Assistant audio responseのTranscriptを取得する。
 
 ---
 
-## T1404 Assistant transcript保存
+## [x] T1404 Assistant transcript保存
 
 Assistant Utteranceとして保存する。
 
