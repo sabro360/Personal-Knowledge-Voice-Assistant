@@ -127,9 +127,25 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
     if (_sessionError != null) {
       return Center(child: Text(_sessionError!));
     }
+
+    final state = _voiceService.connectionState.value;
+
+    if (state == VoiceConnectionState.listening) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.mic, size: 64, color: Colors.green),
+            SizedBox(height: 16),
+            Text('Listening', style: TextStyle(fontSize: 20, color: Colors.green)),
+          ],
+        ),
+      );
+    }
+
     final bool canStart = _sessionId != null &&
         !_isFinished &&
-        _voiceService.connectionState.value == VoiceConnectionState.disconnected;
+        state == VoiceConnectionState.disconnected;
     return Center(
       child: ElevatedButton(
         onPressed: canStart ? _startConversation : null,

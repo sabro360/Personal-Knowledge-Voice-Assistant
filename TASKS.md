@@ -809,7 +809,7 @@ Button:
 
 ---
 
-## T1502 Listening表示
+## [x] T1502 Listening表示
 
 ユーザー発話待ち状態を表示する。
 
