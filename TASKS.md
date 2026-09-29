@@ -875,7 +875,7 @@ AI音声停止とUser発話開始を正しくUIへ反映する。
 
 ---
 
-## T1605 Network disconnect recovery
+## [x] T1605 Network disconnect recovery
 
 ネットワーク切断時に適切にSessionを終了または再接続する。
 

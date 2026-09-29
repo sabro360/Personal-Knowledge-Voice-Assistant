@@ -13,6 +13,9 @@ class WebRtcService {
   RTCDataChannel? _dataChannel;
   final _eventsController = StreamController<String>.broadcast();
 
+  /// Called when the PeerConnection transitions to a failed or disconnected state.
+  void Function()? onDisconnected;
+
   /// Stream of raw JSON event strings received from the OpenAI Realtime API
   /// via the 'oai-events' DataChannel.
   Stream<String> get events => _eventsController.stream;
@@ -65,6 +68,13 @@ class WebRtcService {
       'sdpSemantics': 'unified-plan',
     });
     _peerConnection = pc;
+
+    pc.onConnectionState = (RTCPeerConnectionState state) {
+      if (state == RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
+          state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
+        onDisconnected?.call();
+      }
+    };
 
     // Create DataChannel for Realtime events before createOffer so it
     // is included in the SDP offer sent to OpenAI.

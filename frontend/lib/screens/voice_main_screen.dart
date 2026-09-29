@@ -207,13 +207,18 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
     }
 
     if (state == VoiceConnectionState.error) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red),
-            SizedBox(height: 16),
-            Text('エラーが発生しました', style: TextStyle(fontSize: 20, color: Colors.red)),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('エラーが発生しました', style: TextStyle(fontSize: 20, color: Colors.red)),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: (!_isFinished && !_isFinishing) ? _startConversation : null,
+              child: const Text('再接続'),
+            ),
           ],
         ),
       );

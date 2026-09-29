@@ -93,6 +93,11 @@ class RealtimeVoiceService {
       _eventsSubscription =
           _webRtcService.events.listen(_handleRealtimeEvent);
 
+      _webRtcService.onDisconnected = () {
+        connectionState.value = VoiceConnectionState.error;
+        isConnected.value = false;
+      };
+
       await _webRtcService.connect(clientSecret);
       connectionState.value = VoiceConnectionState.listening;
       isConnected.value = true;
@@ -108,6 +113,7 @@ class RealtimeVoiceService {
   Future<void> disconnect() async {
     _eventsSubscription?.cancel();
     _eventsSubscription = null;
+    _webRtcService.onDisconnected = null;
     await _webRtcService.disconnect();
     connectionState.value = VoiceConnectionState.disconnected;
     isConnected.value = false;
