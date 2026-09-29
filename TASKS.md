@@ -767,7 +767,7 @@ UtteranceとしてBackendへ保存する。
 
 ---
 
-## T1403 Assistant transcript取得
+## [x] T1403 Assistant transcript取得
 
 Assistant audio responseのTranscriptを取得する。
 

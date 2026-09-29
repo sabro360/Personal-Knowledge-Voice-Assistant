@@ -259,4 +259,71 @@ void main() {
       expect(transcripts, isEmpty);
     });
   });
+
+  group('RealtimeVoiceService assistantTranscripts', () {
+    late ControllableWebRtcService fakeWebRtc;
+    late RealtimeVoiceService service;
+
+    setUp(() {
+      fakeWebRtc = ControllableWebRtcService();
+      service = RealtimeVoiceService(
+        recorder: FakeRecorder(),
+        player: FakePlayer(),
+        webRtcService: fakeWebRtc,
+        apiClient: FakeApiClient(),
+      );
+    });
+
+    tearDown(() => service.dispose());
+
+    test('response.output_audio_transcript.done emits transcript', () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.assistantTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"response.output_audio_transcript.done",'
+          '"response_id":"resp_123",'
+          '"item_id":"item_123",'
+          '"output_index":0,'
+          '"content_index":0,'
+          '"transcript":"こんにちは！"'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, ['こんにちは！']);
+    });
+
+    test(
+        'response.output_audio_transcript.done with empty transcript is ignored',
+        () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.assistantTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"response.output_audio_transcript.done",'
+          '"transcript":""'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, isEmpty);
+    });
+
+    test(
+        'response.output_audio_transcript.done with null transcript is ignored',
+        () async {
+      await service.connect();
+      final transcripts = <String>[];
+      service.assistantTranscripts.listen(transcripts.add);
+
+      fakeWebRtc.injectEvent('{'
+          '"type":"response.output_audio_transcript.done",'
+          '"transcript":null'
+          '}');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(transcripts, isEmpty);
+    });
+  });
 }

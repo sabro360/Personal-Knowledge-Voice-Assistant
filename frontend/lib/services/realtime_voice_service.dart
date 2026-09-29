@@ -22,6 +22,7 @@ class RealtimeVoiceService {
 
   StreamSubscription<String>? _eventsSubscription;
   final _userTranscriptController = StreamController<String>.broadcast();
+  final _assistantTranscriptController = StreamController<String>.broadcast();
 
   /// Whether the microphone is currently recording.
   final ValueNotifier<bool> isRecording = ValueNotifier(false);
@@ -38,6 +39,9 @@ class RealtimeVoiceService {
 
   /// Stream of user speech transcripts received from the Realtime API.
   Stream<String> get userTranscripts => _userTranscriptController.stream;
+
+  /// Stream of assistant speech transcripts received from the Realtime API.
+  Stream<String> get assistantTranscripts => _assistantTranscriptController.stream;
 
   RealtimeVoiceService({
     AudioRecorderService? recorder,
@@ -113,6 +117,7 @@ class RealtimeVoiceService {
   void dispose() {
     _eventsSubscription?.cancel();
     _userTranscriptController.close();
+    _assistantTranscriptController.close();
     _recorder.dispose();
     _player.dispose();
     _webRtcService.dispose();
@@ -165,6 +170,11 @@ class RealtimeVoiceService {
           final transcript = event['transcript'] as String?;
           if (transcript == null || transcript.isEmpty) break;
           _userTranscriptController.add(transcript);
+        case 'response.output_audio_transcript.done':
+          // Assistant speech transcript is complete.
+          final assistantTranscript = event['transcript'] as String?;
+          if (assistantTranscript == null || assistantTranscript.isEmpty) break;
+          _assistantTranscriptController.add(assistantTranscript);
       }
     } catch (_) {
       // Ignore malformed events.
