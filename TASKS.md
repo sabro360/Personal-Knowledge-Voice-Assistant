@@ -785,7 +785,7 @@ Voice Session開始時にConversationSessionを作成する。
 
 ---
 
-## T1406 Voice session終了処理
+## [x] T1406 Voice session終了処理
 
 Voice終了時:
 

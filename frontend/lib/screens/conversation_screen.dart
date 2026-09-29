@@ -183,6 +183,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   Future<void> _finishSession() async {
+    // 1. WebRTC切断（接続中のみ、失敗しても続行する）
+    if (_voiceService.isConnected.value) {
+      try {
+        await _voiceService.disconnect();
+      } catch (_) {
+        // 切断失敗はSession終了を止めない
+      }
+    }
+    // 2. Session終了（バックエンドがKnowledge生成を自動実行）
     try {
       await finishSession(_sessionId!);
       if (mounted) {
