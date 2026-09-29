@@ -779,7 +779,7 @@ Assistant Utteranceとして保存する。
 
 ---
 
-## T1405 Voice sessionとDB session紐付け
+## [x] T1405 Voice sessionとDB session紐付け
 
 Voice Session開始時にConversationSessionを作成する。
 
