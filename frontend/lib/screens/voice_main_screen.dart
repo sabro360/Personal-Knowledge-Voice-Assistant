@@ -28,7 +28,7 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
   int? _sessionId;
   bool _isLoadingSession = true;
   String? _sessionError;
-  bool _isFinished = false; // ignore: prefer_final_fields
+  bool _isFinished = false;
 
   @override
   void initState() {
@@ -76,6 +76,35 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
     }
   }
 
+  Future<void> _finishSession() async {
+    // 1. WebRTC切断（接続中のみ、失敗しても続行する）
+    if (_voiceService.isConnected.value) {
+      try {
+        await _voiceService.disconnect();
+      } catch (_) {
+        // 切断失敗はSession終了を止めない
+      }
+    }
+    // 2. Session終了（バックエンドがKnowledge生成を自動実行）
+    try {
+      await finishSession(_sessionId!);
+      if (mounted) {
+        setState(() {
+          _isFinished = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('会話を終了しました')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('会話の終了に失敗しました')),
+        );
+      }
+    }
+  }
+
   Future<void> _startConversation() async {
     try {
       await _voiceService.connect();
@@ -113,6 +142,10 @@ class _VoiceMainScreenState extends State<VoiceMainScreen> {
                 ),
               );
             },
+          ),
+          TextButton(
+            onPressed: (_sessionId == null || _isFinished) ? null : _finishSession,
+            child: const Text('終了'),
           ),
         ],
       ),
