@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/conversation_screen.dart';
+import 'screens/voice_main_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ConversationScreen(),
+      home: const VoiceMainScreen(),
     );
   }
 }

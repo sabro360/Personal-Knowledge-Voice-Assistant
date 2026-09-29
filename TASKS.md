@@ -799,7 +799,7 @@ Voice終了時:
 
 # Phase 15 - Voice UI
 
-## T1501 Voice Main Screen作成
+## [x] T1501 Voice Main Screen作成
 
 メイン操作を極端にシンプルにする。
 
