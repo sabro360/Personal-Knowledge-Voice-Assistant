@@ -947,7 +947,7 @@ User:
 
 ---
 
-## T1805 Voice Retrieval E2E Test
+## [x] T1805 Voice Retrieval E2E Test
 
 例:
 
