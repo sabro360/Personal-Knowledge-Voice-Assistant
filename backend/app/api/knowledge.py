@@ -5,7 +5,14 @@ from app.db.database import get_db
 from app.models.knowledge import Knowledge
 from app.repositories.keyword_repository import KeywordRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
-from app.schemas.knowledge import KnowledgeDetailResponse, KnowledgeResponse
+from app.schemas.knowledge import (
+    KnowledgeDetailResponse,
+    KnowledgeResponse,
+    KnowledgeToolRequest,
+    KnowledgeToolResponse,
+    KnowledgeToolResult,
+)
+from app.services.knowledge_search_service import KnowledgeSearchService
 
 router = APIRouter()
 
@@ -25,6 +32,27 @@ def search_knowledge(
     """Search knowledge items by title, question, summary, or answer."""
     repo = KnowledgeRepository(db)
     return repo.search(q)
+
+
+@router.post("/search_tool", response_model=KnowledgeToolResponse, status_code=200)
+def search_knowledge_tool(
+    body: KnowledgeToolRequest,
+    db: Session = Depends(get_db),
+) -> KnowledgeToolResponse:
+    """Execute knowledge search as an AI tool call."""
+    service = KnowledgeSearchService(knowledge_repo=KnowledgeRepository(db))
+    knowledge_items = service.search(body.query)
+    results = [
+        KnowledgeToolResult(
+            title=k.title,
+            question=k.question,
+            summary=k.summary,
+            answer=k.answer,
+            category=k.category,
+        )
+        for k in knowledge_items
+    ]
+    return KnowledgeToolResponse(results=results, count=len(results))
 
 
 @router.get("/{knowledge_id}", response_model=KnowledgeDetailResponse)

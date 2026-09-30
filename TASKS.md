@@ -925,7 +925,7 @@ AIから呼び出せるSearch Interfaceを定義する。
 
 ---
 
-## T1802 Search Tool API作成
+## [x] T1802 Search Tool API作成
 
 AI ToolとしてKnowledge検索を実行できるようにする。
 
