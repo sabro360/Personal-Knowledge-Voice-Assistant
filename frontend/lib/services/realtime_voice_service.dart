@@ -139,7 +139,8 @@ class RealtimeVoiceService {
       final type = event['type'] as String? ?? '';
       switch (type) {
         case 'session.created':
-          // Enable user speech transcription as soon as the session is ready.
+          // Enable user speech transcription and register the search_knowledge
+          // tool so the AI can query past knowledge when asked.
           // In the GA Realtime API (gpt-realtime-2.1), transcription is configured
           // under session.audio.input.transcription (not input_audio_transcription).
           _webRtcService.sendMessage(jsonEncode({
@@ -154,6 +155,27 @@ class RealtimeVoiceService {
                   },
                 },
               },
+              'tools': [
+                {
+                  'type': 'function',
+                  'name': 'search_knowledge',
+                  'description':
+                      '過去の会話から蓄積されたナレッジを検索します。'
+                      'ユーザーが「前にもこれ聞いた？」「前回〇〇について話したことを教えて」'
+                      'などと尋ねたときに呼び出してください。',
+                  'parameters': {
+                    'type': 'object',
+                    'properties': {
+                      'query': {
+                        'type': 'string',
+                        'description': '検索するキーワードやフレーズ',
+                      },
+                    },
+                    'required': ['query'],
+                  },
+                }
+              ],
+              'tool_choice': 'auto',
             },
           }));
         case 'response.created':
@@ -170,10 +192,22 @@ class RealtimeVoiceService {
         case 'output_audio_buffer.stopped':
           connectionState.value = VoiceConnectionState.listening;
         case 'response.done':
-          // Fallback: transition to listening when no audio was generated
-          // (e.g. text-only response). No-op if already listening.
-          if (connectionState.value != VoiceConnectionState.listening) {
-            connectionState.value = VoiceConnectionState.listening;
+          // Check for AI tool calls before falling back to listening.
+          final response = event['response'] as Map<String, dynamic>?;
+          final output = (response?['output'] as List<dynamic>?) ?? [];
+          final functionCalls = output
+              .whereType<Map<String, dynamic>>()
+              .where((item) => item['type'] == 'function_call')
+              .toList();
+          if (functionCalls.isNotEmpty) {
+            // Execute tool calls; do not transition to listening yet.
+            unawaited(_handleFunctionCalls(functionCalls));
+          } else {
+            // Fallback: transition to listening when no audio was generated
+            // (e.g. text-only response). No-op if already listening.
+            if (connectionState.value != VoiceConnectionState.listening) {
+              connectionState.value = VoiceConnectionState.listening;
+            }
           }
         case 'error':
           connectionState.value = VoiceConnectionState.error;
@@ -192,5 +226,48 @@ class RealtimeVoiceService {
     } catch (_) {
       // Ignore malformed events.
     }
+  }
+
+  /// Executes AI function calls received in a [response.done] event.
+  ///
+  /// For each call, queries the backend and returns the result via
+  /// [conversation.item.create]. Sends [response.create] once all calls
+  /// are done to trigger the next AI turn.
+  Future<void> _handleFunctionCalls(
+    List<Map<String, dynamic>> functionCalls,
+  ) async {
+    for (final call in functionCalls) {
+      final callId = call['call_id'] as String? ?? '';
+      final name = call['name'] as String? ?? '';
+      final argsJson = call['arguments'] as String? ?? '{}';
+
+      String output;
+      try {
+        if (name == 'search_knowledge') {
+          final args = jsonDecode(argsJson) as Map<String, dynamic>;
+          final query = args['query'] as String? ?? '';
+          final result = await _apiClient.post(
+            '/knowledge/search_tool',
+            body: {'query': query},
+          ) as Map<String, dynamic>;
+          output = jsonEncode(result);
+        } else {
+          output = jsonEncode({'error': 'Unknown tool: $name'});
+        }
+      } catch (e) {
+        output = jsonEncode({'error': e.toString()});
+      }
+
+      _webRtcService.sendMessage(jsonEncode({
+        'type': 'conversation.item.create',
+        'item': {
+          'type': 'function_call_output',
+          'call_id': callId,
+          'output': output,
+        },
+      }));
+    }
+
+    _webRtcService.sendMessage(jsonEncode({'type': 'response.create'}));
   }
 }

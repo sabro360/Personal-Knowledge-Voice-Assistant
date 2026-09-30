@@ -931,7 +931,7 @@ AI ToolとしてKnowledge検索を実行できるようにする。
 
 ---
 
-## T1803 Realtime AI Tool連携
+## [x] T1803 Realtime AI Tool連携
 
 User:
 
