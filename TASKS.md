@@ -901,9 +901,19 @@ Conversation途中の追加質問を抽出する。
 
 ---
 
-## T1704 Knowledge生成結果確認
+## [x] T1704 Knowledge生成結果確認
 
 10件以上の実会話で品質確認する。
+
+確認結果（`backend/scripts/verify_knowledge.py` で11シナリオ実行）:
+
+- PASS: 10/11
+- FAIL: 1/11（シナリオ09 植物の光合成 — LLMが `related_questions` に文字列ではなくオブジェクトを返した。スキーマバリデーションエラーで正しく検出）
+- T1702（複数トピック分割）: ✅ シナリオ06で虹・蜃気楼が正しく2件に分割
+- T1703（派生質問）: ✅ シナリオ01でCDの虹色に水滴質問が `related_questions` に入ることを確認
+- 日本語出力: ✅ 全件日本語で適切に生成
+- フィールド品質: ✅ title / question / summary / answer / category / keywords すべて意味のある値
+- 課題: LLMが `related_questions` に文字列の代わりにオブジェクトを返すケースがある（低頻度）
 
 ---
 
