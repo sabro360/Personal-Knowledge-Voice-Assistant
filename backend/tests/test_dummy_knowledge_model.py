@@ -61,3 +61,4 @@ def test_extract_knowledge_returns_knowledge_extraction_list() -> None:
     assert result[0].answer == "dummy answer"
     assert result[0].category == "dummy category"
     assert result[0].keywords == ["dummy keyword"]
+    assert result[0].related_questions == ["dummy related question"]

@@ -58,6 +58,7 @@ def test_extract_sets_fields_from_model() -> None:
         assert ks[0].question == "dummy question"
         assert ks[0].summary == "dummy summary"
         assert ks[0].category == "dummy category"
+        assert ks[0].related_questions == ["dummy related question"]
 
 
 def test_extract_associates_keyword_with_knowledge() -> None:

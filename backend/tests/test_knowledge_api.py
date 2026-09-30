@@ -34,6 +34,7 @@ def test_generate_knowledge_returns_201() -> None:
     assert data["summary"] == "dummy summary"
     assert data["question"] == "dummy question"
     assert data["category"] == "dummy category"
+    assert data["related_questions"] == ["dummy related question"]
     assert "created_at" in data
     assert "updated_at" in data
 

@@ -41,6 +41,7 @@ class KnowledgeExtractionService:
                 question=extraction.question,
                 summary=extraction.summary,
                 category=extraction.category,
+                related_questions=extraction.related_questions if extraction.related_questions else None,
             )
             for name in extraction.keywords:
                 kw = self._keyword_repo.get_or_create(name)

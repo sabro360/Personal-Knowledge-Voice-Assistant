@@ -38,7 +38,9 @@ class OpenAIKnowledgeModel:
                             "summary (1-3 sentence summary), "
                             "answer (the answer or conclusion reached), "
                             "category (1-3 word topic category), "
-                            "keywords (list of key terms as JSON array). "
+                            "keywords (list of key terms as JSON array), "
+                            "related_questions (list of follow-up questions the user asked about this topic "
+                            "during the conversation, empty list if none). "
                             "If only one topic was discussed, return an array with one item. "
                             "Respond in the same language as the conversation."
                         ),

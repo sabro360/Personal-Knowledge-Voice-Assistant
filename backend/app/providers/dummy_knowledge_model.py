@@ -34,4 +34,5 @@ class DummyKnowledgeModel:
             answer="dummy answer",
             category="dummy category",
             keywords=["dummy keyword"],
+            related_questions=["dummy related question"],
         )]

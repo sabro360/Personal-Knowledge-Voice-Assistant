@@ -895,7 +895,7 @@ AI音声停止とUser発話開始を正しくUIへ反映する。
 
 ---
 
-## T1703 派生Question抽出
+## [x] T1703 派生Question抽出
 
 Conversation途中の追加質問を抽出する。
 

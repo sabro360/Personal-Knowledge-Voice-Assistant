@@ -10,6 +10,7 @@ class KnowledgeExtraction(BaseModel):
     answer: str
     category: str
     keywords: list[str]
+    related_questions: list[str] = []
 
 
 class KnowledgeExtractionList(BaseModel):

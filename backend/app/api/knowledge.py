@@ -46,6 +46,7 @@ def get_knowledge(
         summary=knowledge.summary,
         answer=knowledge.answer,
         category=knowledge.category,
+        related_questions=knowledge.related_questions,
         created_at=knowledge.created_at,
         updated_at=knowledge.updated_at,
         keywords=keyword_names,

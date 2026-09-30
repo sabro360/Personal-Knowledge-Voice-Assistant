@@ -22,6 +22,7 @@ def test_knowledge_columns() -> None:
         "summary",
         "answer",
         "category",
+        "related_questions",
         "created_at",
         "updated_at",
     }

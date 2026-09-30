@@ -15,6 +15,7 @@ class KnowledgeResponse(BaseModel):
     summary: str | None
     answer: str | None
     category: str | None
+    related_questions: list[str] | None
     created_at: datetime
     updated_at: datetime
 

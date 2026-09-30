@@ -21,6 +21,7 @@ class KnowledgeRepository:
         summary: str | None = None,
         answer: str | None = None,
         category: str | None = None,
+        related_questions: list[str] | None = None,
     ) -> Knowledge:
         """Create and persist a new Knowledge item."""
         k = Knowledge(
@@ -30,6 +31,7 @@ class KnowledgeRepository:
             summary=summary,
             answer=answer,
             category=category,
+            related_questions=related_questions,
         )
         self._db.add(k)
         self._db.commit()
