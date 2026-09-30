@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class KnowledgeExtraction(BaseModel):
-    """Structured output schema for knowledge extracted from a conversation."""
+    """Structured output schema for a single knowledge item extracted from a conversation."""
 
     title: str
     question: str | None = None
@@ -10,3 +10,9 @@ class KnowledgeExtraction(BaseModel):
     answer: str
     category: str
     keywords: list[str]
+
+
+class KnowledgeExtractionList(BaseModel):
+    """Wrapper for a list of knowledge items extracted from a conversation."""
+
+    items: list[KnowledgeExtraction]

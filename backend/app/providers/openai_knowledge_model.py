@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from app.models.utterance import Utterance
 from app.providers.errors import KnowledgeExtractionError
-from app.providers.knowledge_extraction_schema import KnowledgeExtraction
+from app.providers.knowledge_extraction_schema import KnowledgeExtraction, KnowledgeExtractionList
 
 
 class OpenAIKnowledgeModel:
@@ -19,8 +19,8 @@ class OpenAIKnowledgeModel:
         """Format utterances as a readable conversation transcript."""
         return "\n".join(f"{u.speaker.value}: {u.text}" for u in utterances)
 
-    def _extract_all(self, utterances: list[Utterance]) -> KnowledgeExtraction:
-        """Extract all knowledge fields from utterances in a single structured API call."""
+    def _extract_all(self, utterances: list[Utterance]) -> list[KnowledgeExtraction]:
+        """Extract all knowledge items from utterances in a single structured API call."""
         transcript = self._format_transcript(utterances)
         try:
             response = self._client.chat.completions.create(
@@ -30,13 +30,16 @@ class OpenAIKnowledgeModel:
                         "role": "system",
                         "content": (
                             "You are a knowledge extraction assistant. "
-                            "Analyze the conversation and respond with a JSON object containing exactly these fields: "
+                            "Analyze the conversation and identify ALL distinct questions or topics discussed. "
+                            "Respond with a JSON object containing an 'items' array. "
+                            "Each item must have exactly these fields: "
                             "title (concise 5-10 word title), "
-                            "question (the main question discussed), "
+                            "question (the question discussed), "
                             "summary (1-3 sentence summary), "
                             "answer (the answer or conclusion reached), "
                             "category (1-3 word topic category), "
                             "keywords (list of key terms as JSON array). "
+                            "If only one topic was discussed, return an array with one item. "
                             "Respond in the same language as the conversation."
                         ),
                     },
@@ -55,7 +58,7 @@ class OpenAIKnowledgeModel:
         except json.JSONDecodeError as exc:
             raise KnowledgeExtractionError(f"LLM returned invalid JSON: {exc}") from exc
         try:
-            return KnowledgeExtraction.model_validate(data)
+            return KnowledgeExtractionList.model_validate(data).items
         except ValidationError as exc:
             raise KnowledgeExtractionError(f"LLM response does not match expected schema: {exc}") from exc
 
@@ -65,21 +68,24 @@ class OpenAIKnowledgeModel:
 
     def extract_questions(self, utterances: list[Utterance]) -> list[str]:
         """Extract questions discussed in the conversation."""
-        question = self._extract_all(utterances).question
-        return [question] if question else []
+        items = self._extract_all(utterances)
+        return [item.question for item in items if item.question]
 
     def extract_keywords(self, utterances: list[Utterance]) -> list[str]:
         """Extract relevant keywords from the conversation."""
-        return self._extract_all(utterances).keywords
+        items = self._extract_all(utterances)
+        return items[0].keywords if items else []
 
     def classify_category(self, utterances: list[Utterance]) -> str:
         """Classify the main topic of the conversation into a category."""
-        return self._extract_all(utterances).category
+        items = self._extract_all(utterances)
+        return items[0].category if items else ""
 
     def generate_title(self, utterances: list[Utterance]) -> str:
         """Generate a concise title for the knowledge item."""
-        return self._extract_all(utterances).title
+        items = self._extract_all(utterances)
+        return items[0].title if items else ""
 
-    def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
-        """Extract all knowledge fields in a single API call."""
+    def extract_knowledge(self, utterances: list[Utterance]) -> list[KnowledgeExtraction]:
+        """Extract all knowledge items in a single API call, returning one item per topic."""
         return self._extract_all(utterances)

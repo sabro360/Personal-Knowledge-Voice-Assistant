@@ -27,6 +27,6 @@ class KnowledgeModel(Protocol):
         """Generate a concise title for the knowledge item."""
         ...
 
-    def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
-        """Extract all knowledge fields in a single call."""
+    def extract_knowledge(self, utterances: list[Utterance]) -> list[KnowledgeExtraction]:
+        """Extract all knowledge items in a single call, returning one item per topic."""
         ...

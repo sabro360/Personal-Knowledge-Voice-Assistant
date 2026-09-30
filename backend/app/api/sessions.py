@@ -89,13 +89,13 @@ def list_utterances(session_id: int, db: Session = Depends(get_db)) -> list[Utte
     return utterance_repo.list_by_session(session_id)
 
 
-@router.post("/{session_id}/knowledge", response_model=KnowledgeResponse, status_code=201)
+@router.post("/{session_id}/knowledge", response_model=list[KnowledgeResponse], status_code=201)
 def generate_knowledge(
     session_id: int,
     db: Session = Depends(get_db),
     model: KnowledgeModel = Depends(get_knowledge_model),
-) -> Knowledge:
-    """Generate and persist a Knowledge item from a session's conversation."""
+) -> list[Knowledge]:
+    """Generate and persist Knowledge items from a session's conversation."""
     session_repo = ConversationSessionRepository(db)
     if session_repo.get_by_id(session_id) is None:
         raise HTTPException(status_code=404, detail="Session not found")

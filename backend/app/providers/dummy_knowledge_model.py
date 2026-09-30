@@ -25,13 +25,13 @@ class DummyKnowledgeModel:
         """Return a fixed title string regardless of utterances."""
         return "dummy title"
 
-    def extract_knowledge(self, utterances: list[Utterance]) -> KnowledgeExtraction:
-        """Return a fixed KnowledgeExtraction for testing."""
-        return KnowledgeExtraction(
+    def extract_knowledge(self, utterances: list[Utterance]) -> list[KnowledgeExtraction]:
+        """Return a fixed list of KnowledgeExtraction for testing."""
+        return [KnowledgeExtraction(
             title="dummy title",
             question="dummy question",
             summary="dummy summary",
             answer="dummy answer",
             category="dummy category",
             keywords=["dummy keyword"],
-        )
+        )]

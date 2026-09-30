@@ -24,26 +24,28 @@ class KnowledgeExtractionService:
         self._keyword_repo = keyword_repo
         self._model = model
 
-    def extract(self, session_id: int, utterances: list[Utterance]) -> Knowledge:
-        """Extract knowledge from utterances and persist as Knowledge with associated keywords.
+    def extract(self, session_id: int, utterances: list[Utterance]) -> list[Knowledge]:
+        """Extract knowledge from utterances and persist one Knowledge per topic.
 
-        Calls the KnowledgeModel once to generate all fields, then persists a Knowledge
-        record. Keywords are extracted and associated via KnowledgeKeyword. Returns the
-        persisted Knowledge.
+        Calls the KnowledgeModel once to generate all knowledge items, then persists
+        one Knowledge record per item. Keywords are extracted and associated via
+        KnowledgeKeyword. Returns the list of persisted Knowledge records.
         """
-        extraction = self._model.extract_knowledge(utterances)
+        extractions = self._model.extract_knowledge(utterances)
+        results: list[Knowledge] = []
 
-        knowledge = self._knowledge_repo.create(
-            session_id=session_id,
-            title=extraction.title,
-            question=extraction.question,
-            summary=extraction.summary,
-            category=extraction.category,
-        )
+        for extraction in extractions:
+            knowledge = self._knowledge_repo.create(
+                session_id=session_id,
+                title=extraction.title,
+                question=extraction.question,
+                summary=extraction.summary,
+                category=extraction.category,
+            )
+            for name in extraction.keywords:
+                kw = self._keyword_repo.get_or_create(name)
+                self._db.add(KnowledgeKeyword(knowledge_id=knowledge.id, keyword_id=kw.id))
+            results.append(knowledge)
 
-        for name in extraction.keywords:
-            kw = self._keyword_repo.get_or_create(name)
-            self._db.add(KnowledgeKeyword(knowledge_id=knowledge.id, keyword_id=kw.id))
         self._db.commit()
-
-        return knowledge
+        return results

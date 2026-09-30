@@ -8,7 +8,7 @@ client = TestClient(app)
 def test_get_knowledge_returns_200_with_correct_data() -> None:
     """GET /knowledge/{id} should return 200 with the matching knowledge item."""
     session = client.post("/sessions").json()
-    knowledge = client.post(f"/sessions/{session['id']}/knowledge").json()
+    knowledge = client.post(f"/sessions/{session['id']}/knowledge").json()[0]
 
     response = client.get(f"/knowledge/{knowledge['id']}")
 
@@ -21,7 +21,7 @@ def test_get_knowledge_returns_200_with_correct_data() -> None:
 def test_get_knowledge_includes_keywords_field() -> None:
     """GET /knowledge/{id} should include a keywords list in the response."""
     session = client.post("/sessions").json()
-    knowledge = client.post(f"/sessions/{session['id']}/knowledge").json()
+    knowledge = client.post(f"/sessions/{session['id']}/knowledge").json()[0]
 
     response = client.get(f"/knowledge/{knowledge['id']}")
 

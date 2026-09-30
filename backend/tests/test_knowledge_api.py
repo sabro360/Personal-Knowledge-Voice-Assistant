@@ -18,13 +18,16 @@ def use_dummy_model():
 
 
 def test_generate_knowledge_returns_201() -> None:
-    """POST /sessions/{session_id}/knowledge should return 201 with knowledge data."""
+    """POST /sessions/{session_id}/knowledge should return 201 with a list of knowledge data."""
     session = client.post("/sessions").json()
 
     response = client.post(f"/sessions/{session['id']}/knowledge")
 
     assert response.status_code == 201
-    data = response.json()
+    items = response.json()
+    assert isinstance(items, list)
+    assert len(items) == 1
+    data = items[0]
     assert isinstance(data["id"], int)
     assert data["session_id"] == session["id"]
     assert data["title"] == "dummy title"

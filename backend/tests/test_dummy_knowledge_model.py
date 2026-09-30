@@ -47,15 +47,17 @@ def test_generate_title_returns_fixed_string() -> None:
     assert result == "dummy title"
 
 
-def test_extract_knowledge_returns_knowledge_extraction() -> None:
-    """extract_knowledge() should return a KnowledgeExtraction with all expected fields."""
+def test_extract_knowledge_returns_knowledge_extraction_list() -> None:
+    """extract_knowledge() should return a list with one KnowledgeExtraction."""
     model = DummyKnowledgeModel()
     result = model.extract_knowledge([])
 
-    assert isinstance(result, KnowledgeExtraction)
-    assert result.title == "dummy title"
-    assert result.question == "dummy question"
-    assert result.summary == "dummy summary"
-    assert result.answer == "dummy answer"
-    assert result.category == "dummy category"
-    assert result.keywords == ["dummy keyword"]
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert isinstance(result[0], KnowledgeExtraction)
+    assert result[0].title == "dummy title"
+    assert result[0].question == "dummy question"
+    assert result[0].summary == "dummy summary"
+    assert result[0].answer == "dummy answer"
+    assert result[0].category == "dummy category"
+    assert result[0].keywords == ["dummy keyword"]

@@ -889,7 +889,7 @@ AI音声停止とUser発話開始を正しくUIへ反映する。
 
 ---
 
-## T1702 複数Question抽出
+## [x] T1702 複数Question抽出
 
 1 Sessionに複数疑問が含まれる場合、複数Knowledgeを作れるようにする。
 
