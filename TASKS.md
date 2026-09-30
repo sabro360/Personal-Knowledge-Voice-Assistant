@@ -919,7 +919,7 @@ Conversation途中の追加質問を抽出する。
 
 # Phase 18 - Retrieval in Conversation
 
-## T1801 Knowledge Search Service整理
+## [x] T1801 Knowledge Search Service整理
 
 AIから呼び出せるSearch Interfaceを定義する。
 
