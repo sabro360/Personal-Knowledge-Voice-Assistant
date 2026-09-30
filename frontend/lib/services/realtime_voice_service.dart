@@ -168,7 +168,10 @@ class RealtimeVoiceService {
                     'properties': {
                       'query': {
                         'type': 'string',
-                        'description': '検索するキーワードやフレーズ',
+                        'description':
+                            '検索する短いキーワード（1〜3語）。'
+                            '長い文や説明文ではなく、トピックの核心語を使ってください。'
+                            '例: 「CD」「光の回折」「水と虹」',
                       },
                     },
                     'required': ['query'],

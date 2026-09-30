@@ -1,4 +1,8 @@
+import logging
+
 from fastapi import FastAPI
+
+logging.basicConfig(level=logging.INFO)
 
 from app.api.knowledge import router as knowledge_router
 from app.api.realtime import router as realtime_router

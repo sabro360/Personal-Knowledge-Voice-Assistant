@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -14,6 +16,7 @@ from app.schemas.knowledge import (
 )
 from app.services.knowledge_search_service import KnowledgeSearchService
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -40,8 +43,10 @@ def search_knowledge_tool(
     db: Session = Depends(get_db),
 ) -> KnowledgeToolResponse:
     """Execute knowledge search as an AI tool call."""
+    logger.info("search_knowledge_tool query=%r", body.query)
     service = KnowledgeSearchService(knowledge_repo=KnowledgeRepository(db))
     knowledge_items = service.search(body.query)
+    logger.info("search_knowledge_tool count=%d", len(knowledge_items))
     results = [
         KnowledgeToolResult(
             title=k.title,
