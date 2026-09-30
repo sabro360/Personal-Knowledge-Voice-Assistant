@@ -207,5 +207,30 @@ void main() {
 
       expect(service.connectionState.value, VoiceConnectionState.listening);
     });
+
+    test(
+        'response.done with function_call sends session.update with instructions',
+        () async {
+      await service.connect();
+      fakeWebRtc.sentMessages.clear();
+
+      fakeWebRtc.injectEvent(_responseDoneWithFunctionCall());
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final sessionUpdateMsgs = fakeWebRtc.sentMessages
+          .map((m) => jsonDecode(m) as Map<String, dynamic>)
+          .where((m) => m['type'] == 'session.update')
+          .toList();
+
+      expect(sessionUpdateMsgs, isNotEmpty);
+      final session =
+          sessionUpdateMsgs.first['session'] as Map<String, dynamic>;
+      final instructions = session['instructions'] as String?;
+      expect(instructions, isNotNull);
+      expect(instructions, contains('関連ナレッジ'));
+      // TrackingApiClient returns title='CDの虹色' — verify it's in instructions.
+      expect(instructions, contains('CDの虹色'));
+    });
   });
 }

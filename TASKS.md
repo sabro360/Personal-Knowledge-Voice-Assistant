@@ -941,7 +941,7 @@ User:
 
 ---
 
-## T1804 Search resultをAI Contextへ追加
+## [x] T1804 Search resultをAI Contextへ追加
 
 過去KnowledgeをRealtime conversationへ渡す。
 

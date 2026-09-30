@@ -254,6 +254,19 @@ class RealtimeVoiceService {
             body: {'query': query},
           ) as Map<String, dynamic>;
           output = jsonEncode(result);
+
+          // T1804: inject results into session context so the AI can
+          // reference the knowledge throughout the rest of this session.
+          final results =
+              (result['results'] as List<dynamic>?)?.whereType<Map<String, dynamic>>().toList() ?? [];
+          if (results.isNotEmpty) {
+            _webRtcService.sendMessage(jsonEncode({
+              'type': 'session.update',
+              'session': {
+                'instructions': _buildKnowledgeInstructions(results),
+              },
+            }));
+          }
         } else {
           output = jsonEncode({'error': 'Unknown tool: $name'});
         }
@@ -272,5 +285,31 @@ class RealtimeVoiceService {
     }
 
     _webRtcService.sendMessage(jsonEncode({'type': 'response.create'}));
+  }
+
+  /// Formats [results] from [search_knowledge] into a readable instructions
+  /// string for [session.update].
+  String _buildKnowledgeInstructions(List<Map<String, dynamic>> results) {
+    final buffer = StringBuffer()
+      ..writeln('あなたはパーソナル知識アシスタントです。')
+      ..writeln('ユーザーとの過去の会話から、関連する以下のナレッジが見つかりました。')
+      ..writeln('回答の参考にしてください。')
+      ..writeln()
+      ..writeln('## 関連ナレッジ (${results.length}件)');
+
+    for (final item in results) {
+      final title = item['title'] as String? ?? '';
+      final question = item['question'] as String? ?? '';
+      final summary = item['summary'] as String? ?? '';
+      final answer = item['answer'] as String? ?? '';
+
+      buffer.writeln();
+      if (title.isNotEmpty) buffer.writeln('### $title');
+      if (question.isNotEmpty) buffer.writeln('質問: $question');
+      if (summary.isNotEmpty) buffer.writeln('要約: $summary');
+      if (answer.isNotEmpty) buffer.writeln('回答: $answer');
+    }
+
+    return buffer.toString();
   }
 }
