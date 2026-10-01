@@ -995,7 +995,7 @@ Knowledge生成失敗時もConversationを失わない。
 
 ---
 
-## T1906 Android実機テスト
+## [x] T1906 Android実機テスト
 
 実機で確認:
 
