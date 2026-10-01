@@ -989,7 +989,7 @@ Knowledge生成失敗時もConversationを失わない。
 
 ---
 
-## T1905 Duplicate Knowledge対策
+## [x] T1905 Duplicate Knowledge対策
 
 同一SessionからKnowledge生成APIを複数回呼んでも重複しにくくする。
 

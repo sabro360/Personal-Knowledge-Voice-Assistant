@@ -211,3 +211,19 @@ def test_extract_returns_empty_list_when_no_utterances() -> None:
         result = service.extract(session_id=cs.id, utterances=[])
 
         assert result == []
+
+
+def test_extract_returns_existing_knowledge_without_calling_model_again() -> None:
+    """extract() called twice should return existing Knowledge on the second call."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+        utterance = _make_utterance(db, cs.id)
+
+        service = _make_service(db)
+        first = service.extract(session_id=cs.id, utterances=[utterance])
+        second = service.extract(session_id=cs.id, utterances=[utterance])
+
+        assert len(second) == len(first)
+        assert [k.id for k in second] == [k.id for k in first]

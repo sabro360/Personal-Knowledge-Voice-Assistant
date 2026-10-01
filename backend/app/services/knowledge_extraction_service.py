@@ -33,6 +33,9 @@ class KnowledgeExtractionService:
         """
         if not utterances:
             return []
+        existing = self._knowledge_repo.list_by_session(session_id)
+        if existing:
+            return existing
         extractions = self._model.extract_knowledge(utterances)
         results: list[Knowledge] = []
 

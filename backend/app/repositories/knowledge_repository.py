@@ -47,6 +47,15 @@ class KnowledgeRepository:
         stmt = select(Knowledge).order_by(Knowledge.created_at.desc())
         return list(self._db.scalars(stmt).all())
 
+    def list_by_session(self, session_id: int) -> list[Knowledge]:
+        """Return Knowledge items for the given session ordered by created_at ascending."""
+        stmt = (
+            select(Knowledge)
+            .where(Knowledge.session_id == session_id)
+            .order_by(Knowledge.created_at.asc())
+        )
+        return list(self._db.scalars(stmt).all())
+
     def search(self, query: str) -> list[Knowledge]:
         """Return Knowledge items where title, question, summary, or answer match the query.
 

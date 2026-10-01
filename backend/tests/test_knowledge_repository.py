@@ -214,3 +214,52 @@ def test_search_is_case_insensitive() -> None:
 
         assert len(results_lower) == 1
         assert len(results_upper) == 1
+
+
+def test_list_by_session_returns_knowledge_for_session() -> None:
+    """list_by_session() should return Knowledge items for the given session."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, title="知識1")
+        repo.create(session_id=cs.id, title="知識2")
+
+        items = repo.list_by_session(cs.id)
+
+        assert len(items) == 2
+        titles = {item.title for item in items}
+        assert titles == {"知識1", "知識2"}
+
+
+def test_list_by_session_returns_empty_list_when_no_knowledge() -> None:
+    """list_by_session() should return [] when no Knowledge exists for the session."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+
+        assert repo.list_by_session(cs.id) == []
+
+
+def test_list_by_session_returns_only_knowledge_for_given_session() -> None:
+    """list_by_session() should not include Knowledge from other sessions."""
+    with Session(_make_engine()) as db:
+        cs1 = ConversationSession(started_at=datetime.now(timezone.utc))
+        cs2 = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs1)
+        db.add(cs2)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs1.id, title="セッション1の知識")
+        repo.create(session_id=cs2.id, title="セッション2の知識")
+
+        items = repo.list_by_session(cs1.id)
+
+        assert len(items) == 1
+        assert items[0].title == "セッション1の知識"
