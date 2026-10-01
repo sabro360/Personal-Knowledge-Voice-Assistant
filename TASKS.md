@@ -977,7 +977,7 @@ Timeout時の処理を追加する。
 
 ---
 
-## T1903 Empty conversation handling
+## [x] T1903 Empty conversation handling
 
 Utteranceなしで終了されたSessionを処理する。
 

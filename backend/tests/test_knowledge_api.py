@@ -20,6 +20,7 @@ def use_dummy_model():
 def test_generate_knowledge_returns_201() -> None:
     """POST /sessions/{session_id}/knowledge should return 201 with a list of knowledge data."""
     session = client.post("/sessions").json()
+    client.post(f"/sessions/{session['id']}/utterances", json={"speaker": "user", "text": "test"})
 
     response = client.post(f"/sessions/{session['id']}/knowledge")
 
@@ -71,6 +72,7 @@ def test_generate_knowledge_returns_502_on_extraction_error() -> None:
 
     app.dependency_overrides[get_knowledge_model] = lambda: FailingModel()
     session = client.post("/sessions").json()
+    client.post(f"/sessions/{session['id']}/utterances", json={"speaker": "user", "text": "test"})
 
     response = client.post(f"/sessions/{session['id']}/knowledge")
 

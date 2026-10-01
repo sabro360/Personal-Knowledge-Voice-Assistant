@@ -16,6 +16,7 @@ def test_list_knowledge_returns_200_as_list() -> None:
 def test_list_knowledge_includes_created_knowledge() -> None:
     """GET /knowledge should include a Knowledge item created via POST /sessions/{id}/knowledge."""
     session = client.post("/sessions").json()
+    client.post(f"/sessions/{session['id']}/utterances", json={"speaker": "user", "text": "test"})
     knowledge = client.post(f"/sessions/{session['id']}/knowledge").json()[0]
 
     response = client.get("/knowledge")

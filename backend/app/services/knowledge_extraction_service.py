@@ -31,6 +31,8 @@ class KnowledgeExtractionService:
         one Knowledge record per item. Keywords are extracted and associated via
         KnowledgeKeyword. Returns the list of persisted Knowledge records.
         """
+        if not utterances:
+            return []
         extractions = self._model.extract_knowledge(utterances)
         results: list[Knowledge] = []
 
