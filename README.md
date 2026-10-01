@@ -17,9 +17,16 @@ AIと普通に会話しているだけで、自分専用の知識体系が育つ
 
 ## Environment Variables
 
+`.env.example` を `.env` にコピーして編集する:
+
+```powershell
+# PowerShell
+Copy-Item backend\.env.example backend\.env
+```
+
 ```bash
-cd backend
-cp .env.example .env
+# bash / Git Bash
+cp backend/.env.example backend/.env
 ```
 
 `.env` を編集して以下を設定する:
@@ -55,7 +62,14 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 起動確認:
 
+```powershell
+# PowerShell
+Invoke-RestMethod http://localhost:8000/health
+# status : ok
+```
+
 ```bash
+# bash / Git Bash
 curl http://localhost:8000/health
 # {"status":"ok"}
 ```
