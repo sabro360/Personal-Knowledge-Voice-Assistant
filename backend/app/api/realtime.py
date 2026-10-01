@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import Settings, get_settings
@@ -6,6 +8,7 @@ from app.providers.openai_voice_provider import OpenAIVoiceProvider
 from app.providers.voice_provider import VoiceProvider
 from app.schemas.realtime import RealtimeSessionResponse
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -23,7 +26,8 @@ def create_realtime_session(
     """Create an ephemeral Realtime API session credential for WebRTC connection."""
     try:
         creds = provider.create_realtime_credentials()
-    except VoiceProviderError:
+    except VoiceProviderError as exc:
+        logger.error("Voice provider error: %s", exc)
         raise HTTPException(status_code=502, detail="Voice provider error")
     return RealtimeSessionResponse(
         client_secret=creds.client_secret,

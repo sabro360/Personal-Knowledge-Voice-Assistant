@@ -965,7 +965,7 @@ User:
 
 # Phase 19 - MVP Stabilization
 
-## T1901 Error logging整理
+## [x] T1901 Error logging整理
 
 BackendとFlutter両方に適切なLoggingを追加する。
 

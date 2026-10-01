@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' show log;
 
 import 'package:flutter/foundation.dart';
 
@@ -101,7 +102,13 @@ class RealtimeVoiceService {
       await _webRtcService.connect(clientSecret);
       connectionState.value = VoiceConnectionState.listening;
       isConnected.value = true;
-    } catch (_) {
+    } catch (e, stack) {
+      log(
+        'connect() failed: $e',
+        name: 'RealtimeVoiceService',
+        error: e,
+        stackTrace: stack,
+      );
       _eventsSubscription?.cancel();
       _eventsSubscription = null;
       connectionState.value = VoiceConnectionState.error;
@@ -226,8 +233,8 @@ class RealtimeVoiceService {
           if (assistantTranscript == null || assistantTranscript.isEmpty) break;
           _assistantTranscriptController.add(assistantTranscript);
       }
-    } catch (_) {
-      // Ignore malformed events.
+    } catch (e) {
+      log('Malformed Realtime event: $e', name: 'RealtimeVoiceService');
     }
   }
 

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,6 +20,8 @@ from app.schemas.knowledge import KnowledgeResponse
 from app.schemas.session import SessionResponse
 from app.schemas.utterance import UtteranceCreate, UtteranceResponse
 from app.services.knowledge_extraction_service import KnowledgeExtractionService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -111,7 +114,8 @@ def generate_knowledge(
     )
     try:
         return service.extract(session_id=session_id, utterances=utterances)
-    except KnowledgeExtractionError:
+    except KnowledgeExtractionError as exc:
+        logger.error("Knowledge extraction failed for session %d: %s", session_id, exc)
         raise HTTPException(status_code=502, detail="Knowledge extraction failed")
 
 
@@ -137,7 +141,11 @@ def finish_session(
     )
     try:
         service.extract(session_id=session_id, utterances=utterances)
-    except KnowledgeExtractionError:
-        pass  # Knowledge generation failure does not block session finish
+    except KnowledgeExtractionError as exc:
+        logger.warning(
+            "Knowledge extraction failed for session %d (non-blocking): %s",
+            session_id,
+            exc,
+        )  # Knowledge generation failure does not block session finish
 
     return cs

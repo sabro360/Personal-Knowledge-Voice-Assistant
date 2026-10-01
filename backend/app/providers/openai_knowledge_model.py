@@ -1,4 +1,5 @@
 import json
+import logging
 
 from openai import APIError, OpenAI
 from pydantic import ValidationError
@@ -6,6 +7,8 @@ from pydantic import ValidationError
 from app.models.utterance import Utterance
 from app.providers.errors import KnowledgeExtractionError
 from app.providers.knowledge_extraction_schema import KnowledgeExtraction, KnowledgeExtractionList
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIKnowledgeModel:
@@ -53,15 +56,18 @@ class OpenAIKnowledgeModel:
                 response_format={"type": "json_object"},
             )
         except APIError as exc:
+            logger.error("OpenAI API error during knowledge extraction: %s", exc)
             raise KnowledgeExtractionError(f"OpenAI API error: {exc}") from exc
         content = response.choices[0].message.content or "{}"
         try:
             data = json.loads(content)
         except json.JSONDecodeError as exc:
+            logger.error("LLM returned invalid JSON: %s", exc)
             raise KnowledgeExtractionError(f"LLM returned invalid JSON: {exc}") from exc
         try:
             return KnowledgeExtractionList.model_validate(data).items
         except ValidationError as exc:
+            logger.error("LLM response schema mismatch: %s", exc)
             raise KnowledgeExtractionError(f"LLM response does not match expected schema: {exc}") from exc
 
     def summarize_conversation(self, utterances: list[Utterance]) -> str:
