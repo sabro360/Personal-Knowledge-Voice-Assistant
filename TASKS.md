@@ -1033,7 +1033,7 @@ Knowledge生成失敗時もConversationを失わない。
 
 ---
 
-## T2002 Architecture document作成
+## [x] T2002 Architecture document作成
 
 docs/architecture.md
 
