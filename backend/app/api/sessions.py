@@ -33,6 +33,16 @@ def get_knowledge_model(settings: Settings = Depends(get_settings)) -> Knowledge
     raise HTTPException(status_code=503, detail="OpenAI API key not configured")
 
 
+def get_optional_knowledge_model(settings: Settings = Depends(get_settings)) -> KnowledgeModel | None:
+    """Return KnowledgeModel or None if API key is not configured.
+
+    Used for non-blocking operations where knowledge extraction is optional.
+    """
+    if settings.openai_api_key:
+        return OpenAIKnowledgeModel(api_key=settings.openai_api_key)
+    return None
+
+
 @router.post("", response_model=SessionResponse, status_code=201)
 def create_session(db: Session = Depends(get_db)) -> ConversationSession:
     """Create a new conversation session."""
@@ -123,13 +133,17 @@ def generate_knowledge(
 def finish_session(
     session_id: int,
     db: Session = Depends(get_db),
-    model: KnowledgeModel = Depends(get_knowledge_model),
+    model: KnowledgeModel | None = Depends(get_optional_knowledge_model),
 ) -> ConversationSession:
     """Finish a conversation session and trigger synchronous knowledge generation."""
     repo = ConversationSessionRepository(db)
     cs = repo.finish(session_id, ended_at=datetime.now(timezone.utc))
     if cs is None:
         raise HTTPException(status_code=404, detail="Session not found")
+
+    if model is None:
+        logger.info("Knowledge model not configured, skipping extraction for session %d", session_id)
+        return cs
 
     utterance_repo = UtteranceRepository(db)
     utterances = utterance_repo.list_by_session(session_id)
@@ -141,7 +155,7 @@ def finish_session(
     )
     try:
         service.extract(session_id=session_id, utterances=utterances)
-    except KnowledgeExtractionError as exc:
+    except Exception as exc:
         logger.warning(
             "Knowledge extraction failed for session %d (non-blocking): %s",
             session_id,

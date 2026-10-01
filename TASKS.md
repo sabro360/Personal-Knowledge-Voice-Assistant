@@ -983,7 +983,7 @@ Utteranceなしで終了されたSessionを処理する。
 
 ---
 
-## T1904 Knowledge extraction failure handling
+## [x] T1904 Knowledge extraction failure handling
 
 Knowledge生成失敗時もConversationを失わない。
 

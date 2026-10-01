@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.sessions import get_knowledge_model
+from app.api.sessions import get_knowledge_model, get_optional_knowledge_model
 from app.main import app
 from app.providers.dummy_knowledge_model import DummyKnowledgeModel
 from app.providers.errors import KnowledgeExtractionError
@@ -84,26 +84,40 @@ def test_finish_session_succeeds_even_if_knowledge_extraction_fails() -> None:
     """POST /sessions/{session_id}/finish should return 200 even when knowledge extraction fails."""
 
     class FailingModel:
-        def summarize_conversation(self, utterances):
-            raise KnowledgeExtractionError("fail")
-
-        def extract_questions(self, utterances):
-            raise KnowledgeExtractionError("fail")
-
-        def extract_keywords(self, utterances):
-            raise KnowledgeExtractionError("fail")
-
-        def classify_category(self, utterances):
-            raise KnowledgeExtractionError("fail")
-
-        def generate_title(self, utterances):
-            raise KnowledgeExtractionError("fail")
-
         def extract_knowledge(self, utterances):
             raise KnowledgeExtractionError("fail")
 
-    app.dependency_overrides[get_knowledge_model] = lambda: FailingModel()
+    app.dependency_overrides[get_optional_knowledge_model] = lambda: FailingModel()
     session = client.post("/sessions").json()
+    client.post(f"/sessions/{session['id']}/utterances", json={"speaker": "user", "text": "test"})
+
+    response = client.post(f"/sessions/{session['id']}/finish")
+
+    assert response.status_code == 200
+    assert response.json()["ended_at"] is not None
+
+
+def test_finish_session_succeeds_when_model_not_configured() -> None:
+    """POST /sessions/{session_id}/finish should return 200 when knowledge model is not configured."""
+    app.dependency_overrides[get_optional_knowledge_model] = lambda: None
+    session = client.post("/sessions").json()
+
+    response = client.post(f"/sessions/{session['id']}/finish")
+
+    assert response.status_code == 200
+    assert response.json()["ended_at"] is not None
+
+
+def test_finish_session_succeeds_on_unexpected_extraction_error() -> None:
+    """POST /sessions/{session_id}/finish should return 200 on any unexpected extraction exception."""
+
+    class UnexpectedErrorModel:
+        def extract_knowledge(self, utterances):
+            raise RuntimeError("unexpected error")
+
+    app.dependency_overrides[get_optional_knowledge_model] = lambda: UnexpectedErrorModel()
+    session = client.post("/sessions").json()
+    client.post(f"/sessions/{session['id']}/utterances", json={"speaker": "user", "text": "test"})
 
     response = client.post(f"/sessions/{session['id']}/finish")
 
