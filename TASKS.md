@@ -1007,7 +1007,7 @@ Knowledge生成失敗時もConversationを失わない。
 
 ---
 
-## T1907 30分連続使用テスト
+## [x] T1907 30分連続使用テスト
 
 長時間Conversationの問題を確認する。
 
