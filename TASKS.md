@@ -1021,7 +1021,7 @@ Knowledge生成失敗時もConversationを失わない。
 
 # Phase 20 - MVP Release
 
-## T2001 README更新
+## [x] T2001 README更新
 
 以下を書く。
 
