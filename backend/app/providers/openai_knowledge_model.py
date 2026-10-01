@@ -54,6 +54,7 @@ class OpenAIKnowledgeModel:
                     },
                 ],
                 response_format={"type": "json_object"},
+                timeout=120.0,
             )
         except APIError as exc:
             logger.error("OpenAI API error during knowledge extraction: %s", exc)

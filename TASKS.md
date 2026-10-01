@@ -971,7 +971,7 @@ BackendとFlutter両方に適切なLoggingを追加する。
 
 ---
 
-## T1902 API timeout handling
+## [x] T1902 API timeout handling
 
 Timeout時の処理を追加する。
 

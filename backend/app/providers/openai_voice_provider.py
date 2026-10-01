@@ -19,7 +19,8 @@ class OpenAIVoiceProvider:
         """Create ephemeral credentials for a Realtime API session via OpenAI."""
         try:
             result = self._client.realtime.client_secrets.create(
-                session={"type": "realtime", "model": self._REALTIME_MODEL}
+                session={"type": "realtime", "model": self._REALTIME_MODEL},
+                timeout=30.0,
             )
         except APIError as exc:
             raise VoiceProviderError(f"OpenAI Realtime API error: {exc}") from exc
