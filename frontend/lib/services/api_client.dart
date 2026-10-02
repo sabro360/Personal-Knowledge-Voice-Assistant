@@ -4,9 +4,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
+  // クラウド（Railway）
+  static const String baseUrl =
+      'https://personal-knowledge-voice-assistant-production.up.railway.app';
+  // ローカル開発時はコメントアウトを切り替える
   // エミュレーター: http://10.0.2.2:8000
   // 実機: PC の LAN IP アドレスを使う
-  static const String baseUrl = 'http://192.168.11.4:8000';
+  // static const String baseUrl = 'http://192.168.11.4:8000';
   static const Duration _timeout = Duration(seconds: 30);
 
   Future<dynamic> get(String path) async {

@@ -1100,7 +1100,7 @@ PostgreSQL のみ実行（SQLite では no-op）。
 
 ---
 
-### [ ] T2105 Railway デプロイ実行
+### [x] T2105 Railway デプロイ実行
 
 1. railway.app でプロジェクト作成
 2. GitHub リポジトリ連携
@@ -1111,7 +1111,7 @@ PostgreSQL のみ実行（SQLite では no-op）。
 
 ---
 
-### [ ] T2106 Flutter baseUrl を Railway URL に更新
+### [x] T2106 Flutter baseUrl を Railway URL に更新
 
 Railway デプロイ後、`frontend/lib/services/api_client.dart` の `baseUrl` を更新。
 APK をリビルドして実機で接続確認。
