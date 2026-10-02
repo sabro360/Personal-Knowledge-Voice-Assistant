@@ -3,8 +3,10 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.db.database import get_db
 from app.models.knowledge import Knowledge
+from app.providers.openai_embedding_provider import OpenAIEmbeddingProvider
 from app.repositories.keyword_repository import KeywordRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
 from app.schemas.knowledge import (
@@ -35,6 +37,26 @@ def search_knowledge(
     """Search knowledge items by title, question, summary, or answer."""
     repo = KnowledgeRepository(db)
     return repo.search(q)
+
+
+@router.get("/semantic_search", response_model=list[KnowledgeResponse])
+def semantic_search_knowledge(
+    q: str = Query(min_length=1),
+    limit: int = Query(default=10, ge=1, le=50),
+    db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+) -> list[Knowledge]:
+    """Search knowledge items by semantic similarity to the query using vector embeddings."""
+    embedding_provider = (
+        OpenAIEmbeddingProvider(api_key=settings.openai_api_key)
+        if settings.openai_api_key
+        else None
+    )
+    service = KnowledgeSearchService(
+        knowledge_repo=KnowledgeRepository(db),
+        embedding_provider=embedding_provider,
+    )
+    return service.semantic_search(q, limit=limit)
 
 
 @router.post("/search_tool", response_model=KnowledgeToolResponse, status_code=200)

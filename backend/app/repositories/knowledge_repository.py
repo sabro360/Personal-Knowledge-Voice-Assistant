@@ -76,6 +76,32 @@ class KnowledgeRepository:
         )
         return list(self._db.scalars(stmt).all())
 
+    def update_embedding(self, knowledge_id: int, embedding: list[float]) -> None:
+        """Update the embedding vector of a Knowledge item."""
+        k = self.get_by_id(knowledge_id)
+        if k is None:
+            return
+        k.embedding = embedding
+        self._db.commit()
+
+    def semantic_search(
+        self, embedding: list[float], limit: int = 10
+    ) -> list[Knowledge]:
+        """Return Knowledge items ordered by cosine similarity to the given embedding.
+
+        Uses pgvector <=> (cosine distance) operator. Returns empty list on
+        non-PostgreSQL dialects or when no items have embeddings.
+        """
+        if self._db.bind.dialect.name != "postgresql":  # type: ignore[union-attr]
+            return []
+        stmt = (
+            select(Knowledge)
+            .where(Knowledge.embedding.is_not(None))
+            .order_by(Knowledge.embedding.op("<=>")(embedding))
+            .limit(limit)
+        )
+        return list(self._db.scalars(stmt).all())
+
     def update(
         self,
         knowledge_id: int,

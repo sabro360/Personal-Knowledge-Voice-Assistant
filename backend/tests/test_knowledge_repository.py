@@ -263,3 +263,43 @@ def test_list_by_session_returns_only_knowledge_for_given_session() -> None:
 
         assert len(items) == 1
         assert items[0].title == "セッション1の知識"
+
+
+def test_update_embedding_stores_vector() -> None:
+    """update_embedding() should persist the embedding vector on a Knowledge item."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        k = repo.create(session_id=cs.id, title="テスト知識")
+        assert k.embedding is None
+
+        vec = [0.01] * 1536
+        repo.update_embedding(k.id, vec)
+        db.refresh(k)
+
+        assert k.embedding is not None
+
+
+def test_update_embedding_does_nothing_for_missing_id() -> None:
+    """update_embedding() should not raise an error when knowledge_id does not exist."""
+    with Session(_make_engine()) as db:
+        repo = KnowledgeRepository(db)
+        repo.update_embedding(9999, [0.0] * 1536)  # should not raise
+
+
+def test_semantic_search_returns_empty_list_on_sqlite() -> None:
+    """semantic_search() should return [] on non-PostgreSQL databases."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, title="テスト知識")
+
+        # SQLite does not support vector similarity — must return empty list
+        results = repo.semantic_search([0.01] * 1536)
+        assert results == []

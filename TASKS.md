@@ -1120,8 +1120,72 @@ APK をリビルドして実機で接続確認。
 
 ## Phase 22 — Embedding / Semantic Search
 
-* Embedding（pgvector Vector カラム追加）
-* Semantic Search（意味検索 API・UI）
+### [x] T2201 pgvector Python パッケージ追加
+
+`backend/pyproject.toml` に `pgvector>=0.3.0` を追加。
+
+---
+
+### [x] T2202 EmbeddingProvider Protocol / 実装追加
+
+* `backend/app/providers/embedding_provider.py` — EmbeddingProvider Protocol
+* `backend/app/providers/openai_embedding_provider.py` — OpenAI text-embedding-3-small 実装
+* `backend/app/providers/dummy_embedding_provider.py` — テスト用ダミー（固定ベクトル）
+
+---
+
+### [x] T2203 Knowledge ORM に embedding カラム追加
+
+`backend/app/models/knowledge.py` に `Vector(1536)` カラム追加（nullable=True）。
+
+---
+
+### [x] T2204 Alembic migration 作成（embedding カラム）
+
+`backend/alembic/versions/8142d5573c43_add_embedding_to_knowledge.py`
+PostgreSQL は `Vector(1536)` カラム、SQLite は `Text` カラムとして追加（テスト互換性維持）。
+
+---
+
+### [x] T2205 KnowledgeRepository に update_embedding / semantic_search 追加
+
+* `update_embedding(knowledge_id, embedding)` — embedding 更新
+* `semantic_search(embedding, limit)` — pgvector `<=>` コサイン距離検索（SQLite では空リスト返却）
+
+---
+
+### [x] T2206 KnowledgeExtractionService に EmbeddingProvider 追加
+
+Knowledge 作成後に EmbeddingProvider.embed_text() を呼び出して embedding を保存。
+失敗は非ブロッキング（WARNING ログのみ）。
+
+---
+
+### [x] T2207 KnowledgeSearchService に semantic_search 追加
+
+EmbeddingProvider でクエリをベクトル化し、KnowledgeRepository.semantic_search() に委譲。
+
+---
+
+### [x] T2208 API エンドポイント追加（GET /knowledge/semantic_search）
+
+`GET /knowledge/semantic_search?q={query}&limit={n}` を追加。
+`sessions.py` に `get_optional_embedding_provider()` ヘルパーを追加し、
+Knowledge 抽出時に EmbeddingProvider を渡すよう更新。
+
+---
+
+### [x] T2209 テスト追加・既存テスト通過確認
+
+新規テスト:
+* `test_embedding_provider.py` — DummyEmbeddingProvider の次元数・型・決定性テスト
+* `test_knowledge_repository.py` に update_embedding / semantic_search テスト追加
+* `test_knowledge_extraction_service.py` に埋め込み生成・失敗時継続テスト追加
+* `test_knowledge_search_service.py` に semantic_search テスト追加
+
+既存 118 件 + 新規 11 件 = **129 件すべて pass**。
+
+---
 
 ドキュメント更新（実装完了後）:
 * `docs/database.md`: knowledge テーブルに `embedding` カラム追加を記載

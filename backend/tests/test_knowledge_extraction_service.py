@@ -7,6 +7,7 @@ import app.models  # noqa: F401 - register all models
 from app.db.database import Base
 from app.models.conversation_session import ConversationSession
 from app.models.utterance import SpeakerType, Utterance
+from app.providers.dummy_embedding_provider import DummyEmbeddingProvider
 from app.providers.dummy_knowledge_model import DummyKnowledgeModel
 from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 from app.repositories.keyword_repository import KeywordRepository
@@ -227,3 +228,65 @@ def test_extract_returns_existing_knowledge_without_calling_model_again() -> Non
 
         assert len(second) == len(first)
         assert [k.id for k in second] == [k.id for k in first]
+
+
+def test_extract_stores_embedding_when_provider_given() -> None:
+    """extract() should store an embedding when EmbeddingProvider is configured."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+        utterance = _make_utterance(db, cs.id)
+
+        service = KnowledgeExtractionService(
+            db=db,
+            knowledge_repo=KnowledgeRepository(db),
+            keyword_repo=KeywordRepository(db),
+            model=DummyKnowledgeModel(),
+            embedding_provider=DummyEmbeddingProvider(),
+        )
+        ks = service.extract(session_id=cs.id, utterances=[utterance])
+
+        db.refresh(ks[0])
+        assert ks[0].embedding is not None
+
+
+def test_extract_does_not_store_embedding_when_no_provider() -> None:
+    """extract() should leave embedding as None when no EmbeddingProvider is given."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+        utterance = _make_utterance(db, cs.id)
+
+        service = _make_service(db)  # no embedding_provider
+        ks = service.extract(session_id=cs.id, utterances=[utterance])
+
+        assert ks[0].embedding is None
+
+
+def test_extract_continues_when_embedding_fails() -> None:
+    """extract() should persist Knowledge even if embed_text() raises an exception."""
+
+    class FailingEmbeddingProvider:
+        def embed_text(self, text: str) -> list[float]:
+            raise RuntimeError("embedding API error")
+
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+        utterance = _make_utterance(db, cs.id)
+
+        service = KnowledgeExtractionService(
+            db=db,
+            knowledge_repo=KnowledgeRepository(db),
+            keyword_repo=KeywordRepository(db),
+            model=DummyKnowledgeModel(),
+            embedding_provider=FailingEmbeddingProvider(),
+        )
+        ks = service.extract(session_id=cs.id, utterances=[utterance])
+
+        # Knowledge should be persisted despite embedding failure
+        assert len(ks) == 1
+        assert ks[0].id is not None

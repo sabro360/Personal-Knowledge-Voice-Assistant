@@ -70,3 +70,32 @@ def test_search_is_case_insensitive() -> None:
 
         assert len(results_lower) == 1
         assert len(results_upper) == 1
+
+
+def test_semantic_search_returns_empty_list_when_no_provider() -> None:
+    """semantic_search() should return [] when no EmbeddingProvider is configured."""
+    with Session(_make_engine()) as db:
+        service = KnowledgeSearchService(knowledge_repo=KnowledgeRepository(db))
+        results = service.semantic_search("some query")
+        assert results == []
+
+
+def test_semantic_search_returns_empty_list_on_sqlite() -> None:
+    """semantic_search() should return [] on SQLite (no pgvector support)."""
+    from app.providers.dummy_embedding_provider import DummyEmbeddingProvider
+
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        repo.create(session_id=cs.id, title="テスト知識")
+
+        service = KnowledgeSearchService(
+            knowledge_repo=repo,
+            embedding_provider=DummyEmbeddingProvider(),
+        )
+        # SQLite does not support vector <=> operator — must return empty list
+        results = service.semantic_search("test query")
+        assert results == []

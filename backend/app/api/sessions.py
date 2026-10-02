@@ -9,8 +9,10 @@ from app.db.database import get_db
 from app.models.conversation_session import ConversationSession
 from app.models.knowledge import Knowledge
 from app.models.utterance import Utterance
+from app.providers.embedding_provider import EmbeddingProvider
 from app.providers.errors import KnowledgeExtractionError
 from app.providers.knowledge_model import KnowledgeModel
+from app.providers.openai_embedding_provider import OpenAIEmbeddingProvider
 from app.providers.openai_knowledge_model import OpenAIKnowledgeModel
 from app.repositories.conversation_session_repository import ConversationSessionRepository
 from app.repositories.keyword_repository import KeywordRepository
@@ -40,6 +42,15 @@ def get_optional_knowledge_model(settings: Settings = Depends(get_settings)) -> 
     """
     if settings.openai_api_key:
         return OpenAIKnowledgeModel(api_key=settings.openai_api_key)
+    return None
+
+
+def get_optional_embedding_provider(
+    settings: Settings = Depends(get_settings),
+) -> EmbeddingProvider | None:
+    """Return EmbeddingProvider or None if API key is not configured."""
+    if settings.openai_api_key:
+        return OpenAIEmbeddingProvider(api_key=settings.openai_api_key)
     return None
 
 
@@ -107,6 +118,7 @@ def generate_knowledge(
     session_id: int,
     db: Session = Depends(get_db),
     model: KnowledgeModel = Depends(get_knowledge_model),
+    embedding_provider: EmbeddingProvider | None = Depends(get_optional_embedding_provider),
 ) -> list[Knowledge]:
     """Generate and persist Knowledge items from a session's conversation."""
     session_repo = ConversationSessionRepository(db)
@@ -121,6 +133,7 @@ def generate_knowledge(
         knowledge_repo=KnowledgeRepository(db),
         keyword_repo=KeywordRepository(db),
         model=model,
+        embedding_provider=embedding_provider,
     )
     try:
         return service.extract(session_id=session_id, utterances=utterances)
@@ -134,6 +147,7 @@ def finish_session(
     session_id: int,
     db: Session = Depends(get_db),
     model: KnowledgeModel | None = Depends(get_optional_knowledge_model),
+    embedding_provider: EmbeddingProvider | None = Depends(get_optional_embedding_provider),
 ) -> ConversationSession:
     """Finish a conversation session and trigger synchronous knowledge generation."""
     repo = ConversationSessionRepository(db)
@@ -152,6 +166,7 @@ def finish_session(
         knowledge_repo=KnowledgeRepository(db),
         keyword_repo=KeywordRepository(db),
         model=model,
+        embedding_provider=embedding_provider,
     )
     try:
         service.extract(session_id=session_id, utterances=utterances)
