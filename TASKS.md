@@ -1072,11 +1072,51 @@ Android buildを生成する。
 
 以下はMVP完成後まで実装しない。
 
-## Phase 21
+## Phase 21 — PostgreSQL / pgvector / クラウドデプロイ（Railway）
 
-* PostgreSQL
-* pgvector
-* クラウドデプロイ
+### [x] T2101 psycopg[binary] 追加
+
+`backend/pyproject.toml` に `psycopg[binary]>=3.1.0` を追加。
+
+---
+
+### [x] T2102 .env.example に PostgreSQL URL 例を追加
+
+ローカル開発（SQLite）と本番（PostgreSQL）の両方を記載。
+
+---
+
+### [x] T2103 pgvector 有効化 Alembic migration 作成
+
+`backend/alembic/versions/f1e2d3c4b5a6_enable_pgvector.py`
+PostgreSQL のみ実行（SQLite では no-op）。
+
+---
+
+### [x] T2104 railway.toml 作成
+
+プロジェクトルートに Railway デプロイ設定を作成。
+`startCommand` で `alembic upgrade head` → `uvicorn` の順に実行。
+
+---
+
+### [ ] T2105 Railway デプロイ実行
+
+1. railway.app でプロジェクト作成
+2. GitHub リポジトリ連携
+3. PostgreSQL サービス追加（Railway が DATABASE_URL を自動注入）
+4. 環境変数 `OPENAI_API_KEY` を追加
+5. Root Directory を `backend` に設定
+6. デプロイ完了後 `/health` が 200 を返すことを確認
+
+---
+
+### [ ] T2106 Flutter baseUrl を Railway URL に更新
+
+Railway デプロイ後、`frontend/lib/services/api_client.dart` の `baseUrl` を更新。
+APK をリビルドして実機で接続確認。
+
+---
 
 ## Phase 22
 
