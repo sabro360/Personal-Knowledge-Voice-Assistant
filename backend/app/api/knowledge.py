@@ -3,11 +3,15 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from pydantic import BaseModel
+
 from app.core.config import Settings, get_settings
 from app.db.database import get_db
 from app.models.knowledge import Knowledge
+from app.models.knowledge_relation import KnowledgeRelation
 from app.providers.openai_embedding_provider import OpenAIEmbeddingProvider
 from app.repositories.keyword_repository import KeywordRepository
+from app.repositories.knowledge_relation_repository import KnowledgeRelationRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
 from app.schemas.knowledge import (
     KnowledgeDetailResponse,
@@ -16,7 +20,15 @@ from app.schemas.knowledge import (
     KnowledgeToolResponse,
     KnowledgeToolResult,
 )
+from app.schemas.knowledge_relation import KnowledgeRelationResponse
 from app.services.knowledge_search_service import KnowledgeSearchService
+
+
+class KnowledgeGraphResponse(BaseModel):
+    """Response schema for the Knowledge graph (nodes + edges)."""
+
+    nodes: list[KnowledgeResponse]
+    edges: list[KnowledgeRelationResponse]
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -80,6 +92,14 @@ def search_knowledge_tool(
         for k in knowledge_items
     ]
     return KnowledgeToolResponse(results=results, count=len(results))
+
+
+@router.get("/graph", response_model=KnowledgeGraphResponse)
+def get_knowledge_graph(db: Session = Depends(get_db)) -> KnowledgeGraphResponse:
+    """Return all Knowledge items (nodes) and their relations (edges)."""
+    nodes: list[Knowledge] = KnowledgeRepository(db).list()
+    edges: list[KnowledgeRelation] = KnowledgeRelationRepository(db).list_all()
+    return KnowledgeGraphResponse(nodes=nodes, edges=edges)
 
 
 @router.get("/{knowledge_id}", response_model=KnowledgeDetailResponse)

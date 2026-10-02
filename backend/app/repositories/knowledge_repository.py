@@ -102,6 +102,34 @@ class KnowledgeRepository:
         )
         return list(self._db.scalars(stmt).all())
 
+    def find_similar(
+        self,
+        knowledge_id: int,
+        threshold: float = 0.25,
+        limit: int = 5,
+    ) -> list[tuple[Knowledge, float]]:
+        """Return Knowledge items within cosine distance threshold of the given item.
+
+        Returns list of (Knowledge, similarity_score) where similarity_score = 1 - distance.
+        Returns empty list on non-PostgreSQL dialects or if the target has no embedding.
+        """
+        if self._db.bind.dialect.name != "postgresql":  # type: ignore[union-attr]
+            return []
+        k = self.get_by_id(knowledge_id)
+        if k is None or k.embedding is None:
+            return []
+        distance_col = Knowledge.embedding.op("<=>")(k.embedding).label("distance")
+        stmt = (
+            select(Knowledge, distance_col)
+            .where(Knowledge.embedding.is_not(None))
+            .where(Knowledge.id != knowledge_id)
+            .where(distance_col <= threshold)
+            .order_by(distance_col)
+            .limit(limit)
+        )
+        rows = self._db.execute(stmt).all()
+        return [(row[0], 1.0 - row[1]) for row in rows]
+
     def update(
         self,
         knowledge_id: int,

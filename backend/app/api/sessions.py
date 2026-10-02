@@ -16,12 +16,14 @@ from app.providers.openai_embedding_provider import OpenAIEmbeddingProvider
 from app.providers.openai_knowledge_model import OpenAIKnowledgeModel
 from app.repositories.conversation_session_repository import ConversationSessionRepository
 from app.repositories.keyword_repository import KeywordRepository
+from app.repositories.knowledge_relation_repository import KnowledgeRelationRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
 from app.repositories.utterance_repository import UtteranceRepository
 from app.schemas.knowledge import KnowledgeResponse
 from app.schemas.session import SessionResponse
 from app.schemas.utterance import UtteranceCreate, UtteranceResponse
 from app.services.knowledge_extraction_service import KnowledgeExtractionService
+from app.services.knowledge_relation_service import KnowledgeRelationService
 
 logger = logging.getLogger(__name__)
 
@@ -128,12 +130,17 @@ def generate_knowledge(
     utterance_repo = UtteranceRepository(db)
     utterances = utterance_repo.list_by_session(session_id)
 
+    knowledge_repo = KnowledgeRepository(db)
     service = KnowledgeExtractionService(
         db=db,
-        knowledge_repo=KnowledgeRepository(db),
+        knowledge_repo=knowledge_repo,
         keyword_repo=KeywordRepository(db),
         model=model,
         embedding_provider=embedding_provider,
+        relation_service=KnowledgeRelationService(
+            knowledge_repo=knowledge_repo,
+            relation_repo=KnowledgeRelationRepository(db),
+        ),
     )
     try:
         return service.extract(session_id=session_id, utterances=utterances)
@@ -161,12 +168,17 @@ def finish_session(
 
     utterance_repo = UtteranceRepository(db)
     utterances = utterance_repo.list_by_session(session_id)
+    knowledge_repo = KnowledgeRepository(db)
     service = KnowledgeExtractionService(
         db=db,
-        knowledge_repo=KnowledgeRepository(db),
+        knowledge_repo=knowledge_repo,
         keyword_repo=KeywordRepository(db),
         model=model,
         embedding_provider=embedding_provider,
+        relation_service=KnowledgeRelationService(
+            knowledge_repo=knowledge_repo,
+            relation_repo=KnowledgeRelationRepository(db),
+        ),
     )
     try:
         service.extract(session_id=session_id, utterances=utterances)

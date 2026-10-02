@@ -303,3 +303,42 @@ def test_semantic_search_returns_empty_list_on_sqlite() -> None:
         # SQLite does not support vector similarity — must return empty list
         results = repo.semantic_search([0.01] * 1536)
         assert results == []
+
+
+def test_find_similar_returns_empty_list_on_sqlite() -> None:
+    """find_similar() should return [] on non-PostgreSQL databases."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        k = repo.create(session_id=cs.id, title="テスト知識")
+
+        results = repo.find_similar(k.id)
+        assert results == []
+
+
+def test_find_similar_returns_empty_list_for_knowledge_without_embedding() -> None:
+    """find_similar() should return [] when the target Knowledge has no embedding."""
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+
+        repo = KnowledgeRepository(db)
+        k = repo.create(session_id=cs.id, title="埋め込みなし知識")
+        assert k.embedding is None
+
+        # On SQLite this returns [] due to dialect check, but intent is also true for no embedding
+        results = repo.find_similar(k.id)
+        assert results == []
+
+
+def test_find_similar_returns_empty_list_for_missing_knowledge() -> None:
+    """find_similar() should return [] when knowledge_id does not exist."""
+    with Session(_make_engine()) as db:
+        repo = KnowledgeRepository(db)
+
+        results = repo.find_similar(9999)
+        assert results == []

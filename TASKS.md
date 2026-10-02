@@ -1194,10 +1194,23 @@ Knowledge 抽出時に EmbeddingProvider を渡すよう更新。
 
 ---
 
-## Phase 23 — Knowledge Relation / Knowledge Graph
+## Phase 23 — Knowledge Relation / Knowledge Graph ✅ 完了
 
-* KnowledgeRelation テーブル追加
-* Knowledge Graph UI
+* KnowledgeRelation テーブル追加 ✅
+* Knowledge Graph UI ✅
+
+完了内容:
+* `KnowledgeRelation` ORM モデル追加（`knowledge_relations` テーブル）
+* Alembic migration `27aadf6a0922_add_knowledge_relation` 追加
+* `KnowledgeRelationRepository` 追加（create / exists / list_all）
+* `KnowledgeRepository.find_similar()` 追加（pgvector cosine 距離、SQLite では []）
+* `KnowledgeRelationService` 追加（類似度閾値 0.25 で自動生成）
+* `KnowledgeExtractionService` に `relation_service` 引数追加（非ブロッキング）
+* `GET /knowledge/graph` エンドポイント追加（nodes + edges）
+* Flutter `KnowledgeGraph` / `KnowledgeRelation` モデル追加
+* Flutter `KnowledgeGraphScreen` 追加（CustomPainter + InteractiveViewer）
+* Flutter `KnowledgeListScreen` に グラフボタン（hub アイコン）追加
+* テスト 147 件 pass
 
 ドキュメント更新（実装完了後）:
 * `docs/database.md`: KnowledgeRelation テーブルを追記

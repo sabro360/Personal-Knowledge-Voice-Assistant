@@ -9,6 +9,7 @@ from app.providers.embedding_provider import EmbeddingProvider
 from app.providers.knowledge_model import KnowledgeModel
 from app.repositories.keyword_repository import KeywordRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
+from app.services.knowledge_relation_service import KnowledgeRelationService
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +30,15 @@ class KnowledgeExtractionService:
         keyword_repo: KeywordRepository,
         model: KnowledgeModel,
         embedding_provider: EmbeddingProvider | None = None,
+        relation_service: KnowledgeRelationService | None = None,
     ) -> None:
-        """Initialize with database session, repositories, knowledge model, and optional embedding provider."""
+        """Initialize with database session, repositories, model, and optional providers."""
         self._db = db
         self._knowledge_repo = knowledge_repo
         self._keyword_repo = keyword_repo
         self._model = model
         self._embedding_provider = embedding_provider
+        self._relation_service = relation_service
 
     def extract(self, session_id: int, utterances: list[Utterance]) -> list[Knowledge]:
         """Extract knowledge from utterances and persist one Knowledge per topic.
@@ -75,6 +78,14 @@ class KnowledgeExtractionService:
                 except Exception as exc:
                     logger.warning(
                         "Embedding generation failed for knowledge %d: %s", knowledge.id, exc
+                    )
+
+            if self._relation_service is not None:
+                try:
+                    self._relation_service.generate_relations_for_knowledge(knowledge.id)
+                except Exception as exc:
+                    logger.warning(
+                        "Relation generation failed for knowledge %d: %s", knowledge.id, exc
                     )
 
             results.append(knowledge)

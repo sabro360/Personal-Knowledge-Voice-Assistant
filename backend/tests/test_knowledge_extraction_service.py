@@ -11,8 +11,10 @@ from app.providers.dummy_embedding_provider import DummyEmbeddingProvider
 from app.providers.dummy_knowledge_model import DummyKnowledgeModel
 from app.providers.knowledge_extraction_schema import KnowledgeExtraction
 from app.repositories.keyword_repository import KeywordRepository
+from app.repositories.knowledge_relation_repository import KnowledgeRelationRepository
 from app.repositories.knowledge_repository import KnowledgeRepository
 from app.services.knowledge_extraction_service import KnowledgeExtractionService
+from app.services.knowledge_relation_service import KnowledgeRelationService
 
 
 def _make_engine():
@@ -288,5 +290,61 @@ def test_extract_continues_when_embedding_fails() -> None:
         ks = service.extract(session_id=cs.id, utterances=[utterance])
 
         # Knowledge should be persisted despite embedding failure
+        assert len(ks) == 1
+        assert ks[0].id is not None
+
+
+def test_extract_calls_relation_service_when_provided() -> None:
+    """extract() should call generate_relations_for_knowledge() when relation_service is given."""
+    calls: list[int] = []
+
+    class SpyRelationService:
+        def generate_relations_for_knowledge(self, knowledge_id: int) -> list:
+            calls.append(knowledge_id)
+            return []
+
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+        utterance = _make_utterance(db, cs.id)
+
+        knowledge_repo = KnowledgeRepository(db)
+        service = KnowledgeExtractionService(
+            db=db,
+            knowledge_repo=knowledge_repo,
+            keyword_repo=KeywordRepository(db),
+            model=DummyKnowledgeModel(),
+            relation_service=SpyRelationService(),
+        )
+        ks = service.extract(session_id=cs.id, utterances=[utterance])
+
+        assert len(ks) == 1
+        assert ks[0].id in calls
+
+
+def test_extract_continues_when_relation_service_fails() -> None:
+    """extract() should persist Knowledge even if generate_relations_for_knowledge() raises."""
+
+    class FailingRelationService:
+        def generate_relations_for_knowledge(self, knowledge_id: int) -> list:
+            raise RuntimeError("relation generation error")
+
+    with Session(_make_engine()) as db:
+        cs = ConversationSession(started_at=datetime.now(timezone.utc))
+        db.add(cs)
+        db.flush()
+        utterance = _make_utterance(db, cs.id)
+
+        knowledge_repo = KnowledgeRepository(db)
+        service = KnowledgeExtractionService(
+            db=db,
+            knowledge_repo=knowledge_repo,
+            keyword_repo=KeywordRepository(db),
+            model=DummyKnowledgeModel(),
+            relation_service=FailingRelationService(),
+        )
+        ks = service.extract(session_id=cs.id, utterances=[utterance])
+
         assert len(ks) == 1
         assert ks[0].id is not None

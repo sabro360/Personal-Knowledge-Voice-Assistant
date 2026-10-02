@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/knowledge.dart';
 import '../services/knowledge_service.dart';
 import 'knowledge_detail_screen.dart';
+import 'knowledge_graph_screen.dart';
 import 'knowledge_search_screen.dart';
 
 class KnowledgeListScreen extends StatefulWidget {
@@ -52,6 +53,18 @@ class _KnowledgeListScreenState extends State<KnowledgeListScreen> {
       appBar: AppBar(
         title: const Text('ナレッジ一覧'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.hub),
+            tooltip: 'ナレッジグラフ',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const KnowledgeGraphScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
