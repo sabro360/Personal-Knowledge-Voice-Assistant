@@ -2,8 +2,9 @@
 
 ## Overview
 
-MVP では SQLite を使用する。Alembic でマイグレーションを管理する。
-将来は PostgreSQL + pgvector へ移行し、Vector Search に対応する予定。
+本番環境は PostgreSQL（Railway managed）を使用する。Alembic でマイグレーションを管理する。
+ローカル開発は SQLite を使用する（`DATABASE_URL=sqlite:///./app.db`）。
+pgvector extension は有効化済み。Phase 22 で `embedding` カラムを追加し Vector Search を実現予定。
 
 ---
 
@@ -144,12 +145,12 @@ uv run alembic downgrade -1
 | utterances を Knowledge 生成後も削除しない | 会話履歴の保全・再抽出に対応するため |
 | related_questions を JSON カラムで管理 | MVP では正規化コストが見合わない |
 | keywords を正規化（separate table + M:M） | 同一キーワードを複数 Knowledge で共有し、将来の集計に備える |
-| SQLite を MVP DB として採用 | セットアップ不要、データ規模が小さい段階で十分 |
+| PostgreSQL を本番 DB として採用（Railway） | スケーラビリティ確保、pgvector 対応 |
+| SQLite をローカル開発 DB として継続使用 | セットアップ不要、テストでも使用 |
 
 ---
 
 ## Future Extensions (Post-MVP)
 
-- **PostgreSQL 移行**: スケーラビリティ対応
-- **pgvector**: `knowledge` テーブルに `embedding` カラムを追加し Vector Search を実現
-- **KnowledgeRelation テーブル**: Knowledge 間の関連（関連概念・前提知識等）を管理
+- **pgvector**: `knowledge` テーブルに `embedding` カラムを追加し Vector Search を実現（Phase 22）
+- **KnowledgeRelation テーブル**: Knowledge 間の関連（関連概念・前提知識等）を管理（Phase 23）

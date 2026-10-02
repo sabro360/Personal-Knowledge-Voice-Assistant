@@ -8,9 +8,10 @@ Flutter (Android)
     ├─ WebRTC ────────────────────────────── OpenAI Realtime API
     │   (音声ストリーム / DataChannel)         (gpt-realtime-2.1)
     │
-    └─ HTTPS ─────────────────────────────── FastAPI Backend
+    └─ HTTPS ─────────────────────────────── FastAPI Backend（Railway）
         (REST API)                              │
-                                                ├─ SQLite (MVP)
+                                                ├─ PostgreSQL（Railway managed）
+                                                │   └─ pgvector extension
                                                 └─ OpenAI API
                                                    (gpt-4o-mini / Knowledge 抽出)
 ```
@@ -198,7 +199,7 @@ RealtimeVoiceService
 | 音声は Flutter → OpenAI 直接（Backend 中継なし） | レイテンシ最小化、Backend の負荷軽減 |
 | Backend は Ephemeral Token 発行のみ | 長期 API Key をモバイルに渡さない（セキュリティ） |
 | Knowledge 抽出は Session finish 時に同期実行 | MVP では非同期キューは過剰 |
-| SQLite を MVP DB として採用 | セットアップ不要、スケールは将来課題 |
+| PostgreSQL + Railway を本番 DB として採用 | スケーラビリティ確保、pgvector で将来の意味検索に対応 |
 | ORM Model と API Schema を分離 | DB 変更と API 変更を独立して行える |
 | Provider Protocol で AI を抽象化 | 将来のベンダー切り替えに対応 |
 
@@ -206,9 +207,8 @@ RealtimeVoiceService
 
 ## Future Extensions (Post-MVP)
 
-- **Vector Search**: pgvector による意味検索
-- **PostgreSQL 移行**: スケーラビリティ対応
-- **iOS / Web**: Flutter クロスプラットフォーム展開
-- **Gemini Live Provider**: VoiceProvider の実装追加
-- **Knowledge Graph**: KnowledgeRelation テーブルによる関連可視化
-- **Background Audio / Wake Word**: Screen Off での音声操作
+- **Vector Search**: pgvector による意味検索（Phase 22）
+- **iOS / Web**: Flutter クロスプラットフォーム展開（Phase 26）
+- **Gemini Live Provider**: VoiceProvider の実装追加（Phase 27）
+- **Knowledge Graph**: KnowledgeRelation テーブルによる関連可視化（Phase 23）
+- **Background Audio / Wake Word**: Screen Off での音声操作（Phase 25）

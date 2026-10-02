@@ -1118,37 +1118,82 @@ APK をリビルドして実機で接続確認。
 
 ---
 
-## Phase 22
+## Phase 22 — Embedding / Semantic Search
 
-* Embedding
-* Semantic Search
+* Embedding（pgvector Vector カラム追加）
+* Semantic Search（意味検索 API・UI）
 
-## Phase 23
+ドキュメント更新（実装完了後）:
+* `docs/database.md`: knowledge テーブルに `embedding` カラム追加を記載
+* `docs/architecture.md`: Semantic Search フロー・EmbeddingProvider を追記
+* `README.md`: 検索機能の説明を更新
 
-* Knowledge Relation
-* Knowledge Graph
+---
 
-## Phase 24
+## Phase 23 — Knowledge Relation / Knowledge Graph
+
+* KnowledgeRelation テーブル追加
+* Knowledge Graph UI
+
+ドキュメント更新（実装完了後）:
+* `docs/database.md`: KnowledgeRelation テーブルを追記
+* `docs/architecture.md`: Knowledge Graph セクションを追記
+
+---
+
+## Phase 24 — Bluetooth Headset Optimization
 
 * Bluetooth headset optimization
 
-## Phase 25
+ドキュメント更新（実装完了後）:
+* `docs/architecture.md`: Flutter Voice 要件に Bluetooth を追記
+* `README.md`: Bluetooth 使用時の注意事項を追記
+
+---
+
+## Phase 25 — Background / Screen Off Operation
 
 * Background / Screen Off operation
 
-## Phase 26
+ドキュメント更新（実装完了後）:
+* `docs/architecture.md`: Background Audio / Wake Word セクションを更新
+* `README.md`: Android パーミッション要件を更新
 
-* iOS
+---
 
-## Phase 27
+## Phase 26 — iOS
 
-* Gemini Live Provider
+* iOS 対応
 
-## Phase 28
+ドキュメント更新（実装完了後）:
+* `README.md`: iOS セットアップ手順を追加
+* `docs/architecture.md`: ターゲットプラットフォームを更新
 
-* Claude Knowledge Provider
+---
 
-## Phase 29
+## Phase 27 — Gemini Live Provider
+
+* Gemini Live Provider 実装
+
+ドキュメント更新（実装完了後）:
+* `docs/architecture.md`: Provider Abstraction に Gemini を追記
+* `README.md`: Gemini API キー設定を追記
+* `backend/.env.example`: GEMINI_API_KEY を追加
+
+---
+
+## Phase 28 — Claude Knowledge Provider
+
+* Claude Knowledge Provider 実装
+
+ドキュメント更新（実装完了後）:
+* `docs/architecture.md`: KnowledgeModel に Claude Provider を追記
+* `README.md`: Anthropic API キー設定を追記
+* `backend/.env.example`: ANTHROPIC_API_KEY を追加
+
+---
+
+## Phase 29 — Knowledge Analytics
 
 * Knowledge analytics
 
@@ -1159,3 +1204,7 @@ APK をリビルドして実機で接続確認。
 * 理解が浅い可能性のある分野
 * 新しく学んだテーマ
 * 関連Knowledge推薦
+
+ドキュメント更新（実装完了後）:
+* `docs/architecture.md`: Analytics セクションを追記
+* 必要に応じて `docs/analytics.md` を新規作成

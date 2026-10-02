@@ -15,7 +15,40 @@ AIと普通に会話しているだけで、自分専用の知識体系が育つ
 
 ---
 
-## Environment Variables
+## Cloud Deployment（本番環境）
+
+Backend は Railway にデプロイ済み。PC 起動不要で利用できる。
+
+- **Backend URL**: `https://personal-knowledge-voice-assistant-production.up.railway.app`
+- **Database**: PostgreSQL（Railway managed）
+- **デプロイ**: GitHub push で自動デプロイ
+
+起動確認:
+
+```powershell
+# PowerShell
+Invoke-RestMethod https://personal-knowledge-voice-assistant-production.up.railway.app/health
+# status : ok
+```
+
+```bash
+# bash / Git Bash
+curl https://personal-knowledge-voice-assistant-production.up.railway.app/health
+# {"status":"ok"}
+```
+
+### Railway 環境変数（ダッシュボードで設定）
+
+| 変数 | 説明 |
+|------|------|
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` で PostgreSQL を参照 |
+| `OPENAI_API_KEY` | OpenAI API キー |
+
+---
+
+## Local Development（ローカル開発）
+
+### Environment Variables
 
 `.env.example` を `.env` にコピーして編集する:
 
@@ -38,11 +71,7 @@ cp backend/.env.example backend/.env
 
 > `.env` は `.gitignore` で除外済み。Git に追加しないこと。
 
----
-
-## Backend
-
-### セットアップ
+### Backend
 
 ```bash
 cd backend
@@ -52,11 +81,8 @@ uv sync
 
 # Database migration 適用
 uv run alembic upgrade head
-```
 
-### 起動
-
-```bash
+# 起動
 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -74,25 +100,19 @@ curl http://localhost:8000/health
 # {"status":"ok"}
 ```
 
----
+### Flutter
 
-## Flutter
-
-### baseUrl の設定
-
-[frontend/lib/services/api_client.dart](frontend/lib/services/api_client.dart) の `baseUrl` を環境に合わせて変更する:
+[frontend/lib/services/api_client.dart](frontend/lib/services/api_client.dart) の `baseUrl` をコメントアウトで切り替える:
 
 ```dart
-// エミュレーター使用時
-static const String baseUrl = 'http://10.0.2.2:8000';
+// クラウド（Railway）- デフォルト
+static const String baseUrl =
+    'https://personal-knowledge-voice-assistant-production.up.railway.app';
 
-// 実機使用時（PC の LAN IP に合わせる）
-static const String baseUrl = 'http://192.168.x.x:8000';
+// ローカル開発時はコメントアウトを切り替える
+// エミュレーター: http://10.0.2.2:8000
+// 実機（PC の LAN IP）: http://192.168.x.x:8000
 ```
-
-PC の LAN IP は `ipconfig`（Windows）または `ifconfig`（Mac/Linux）で確認する。
-
-### セットアップ・起動
 
 ```bash
 cd frontend
@@ -126,8 +146,8 @@ uv run alembic revision --autogenerate -m "description"
 ## Architecture
 
 - Frontend: Flutter (Android)
-- Backend: Python / FastAPI
-- Database: SQLite (MVP)
+- Backend: Python / FastAPI（Railway にデプロイ）
+- Database: PostgreSQL（Railway managed）+ pgvector
 - Voice AI: OpenAI Realtime API / WebRTC
 
 詳細は [docs/architecture.md](docs/architecture.md) を参照。

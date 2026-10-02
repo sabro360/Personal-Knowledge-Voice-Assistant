@@ -1,7 +1,39 @@
 {
   "permissions": {
     "allow": [
-      "Bash(test -d \"/c/work/Personal Knowledge Voice Assistant/.git\")"
+      "Bash(test -d \"/c/work/Personal Knowledge Voice Assistant/.git\")",
+      "Bash(test -d \"c:\\\\work\\\\Personal Knowledge Voice Assistant\\\\frontend\")",
+      "Bash(test -d \"c:\\\\work\\\\Personal Knowledge Voice Assistant\\\\backend\")",
+      "Bash(uv --version)",
+      "Bash(powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\")",
+      "Bash(~/.local/bin/uv --version)",
+      "Bash(~/.local/bin/uv sync)",
+      "Bash(~/.local/bin/uv run python -c \"from app.main import app; print\\(app.title\\)\")",
+      "Bash(~/.local/bin/uv run pytest tests/)",
+      "Bash(echo \"VIRTUAL_ENV=$VIRTUAL_ENV\")",
+      "Bash(~/.local/bin/uv run pytest tests/ -v)",
+      "Bash(~/.local/bin/uv run python -c \"from app.db.database import engine; print\\(repr\\(str\\(engine.url\\)\\)\\)\")",
+      "Bash(flutter --version)",
+      "Bash(flutter analyze)",
+      "Bash(flutter doctor -v)",
+      "Bash(yes)",
+      "Bash(flutter doctor --android-licenses)",
+      "Bash(flutter build apk --debug)",
+      "Bash(flutter devices)",
+      "Bash(flutter emulators)",
+      "Bash(flutter emulators --launch Pixel_3a_API_34_extension_level_7_x86_64)",
+      "Bash(flutter run --device-id Pixel_3a_API_34_extension_level_7_x86_64)",
+      "Bash(flutter run -d emulator-5554 --no-pub)",
+      "Bash(flutter doctor)",
+      "Bash(flutter pub get)",
+      "Bash(uv run pytest -v)",
+      "WebFetch(domain:pub.dev)",
+      "Read(//c/Users/sabro/AppData/Local/Pub/Cache/hosted/pub.dev/**)",
+      "Bash(python3 -c \":*)",
+      "Bash(pip show openai)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\sabro\\.claude\\projects\\c--work-Personal-Knowledge-Voice-Assistant"
     ]
   }
 }
