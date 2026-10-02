@@ -1039,7 +1039,7 @@ docs/architecture.md
 
 ---
 
-## T2003 Database document作成
+## [x] T2003 Database document作成
 
 docs/database.md
 
