@@ -1074,13 +1074,14 @@ Android buildを生成する。
 
 ## Phase 21
 
-* Embedding
-* Semantic Search
+* PostgreSQL
+* pgvector
+* クラウドデプロイ
 
 ## Phase 22
 
-* PostgreSQL
-* pgvector
+* Embedding
+* Semantic Search
 
 ## Phase 23
 
