@@ -50,7 +50,8 @@ app/db/             DB エンジン・セッション管理
 | POST | /sessions/{id}/knowledge | Knowledge 手動生成 |
 | GET | /knowledge | Knowledge 一覧 |
 | GET | /knowledge/{id} | Knowledge 詳細（keywords 付き） |
-| GET | /knowledge/search | テキスト検索 |
+| GET | /knowledge/search | テキスト検索（LIKE） |
+| GET | /knowledge/semantic_search | セマンティック検索（ベクトル類似度） |
 | POST | /knowledge/search_tool | AI Tool Call 用検索 |
 | POST | /realtime/session | Ephemeral クレデンシャル発行 |
 
@@ -86,12 +87,16 @@ ConversationSession
 
 ```
 VoiceProvider (Protocol)
-  └─ OpenAIVoiceProvider   → OpenAI Realtime API (gpt-realtime-2.1)
-  └─ DummyVoiceProvider    → テスト用
+  └─ OpenAIVoiceProvider       → OpenAI Realtime API (gpt-realtime-2.1)
+  └─ DummyVoiceProvider        → テスト用
 
 KnowledgeModel (Protocol)
-  └─ OpenAIKnowledgeModel  → OpenAI API (gpt-4o-mini, structured output)
-  └─ DummyKnowledgeModel   → テスト用
+  └─ OpenAIKnowledgeModel      → OpenAI API (gpt-4o-mini, structured output)
+  └─ DummyKnowledgeModel       → テスト用
+
+EmbeddingProvider (Protocol)
+  └─ OpenAIEmbeddingProvider   → OpenAI API (text-embedding-3-small, 1536次元)
+  └─ DummyEmbeddingProvider    → テスト用（固定ベクトル）
 ```
 
 Service 層は Provider の具体的な実装に依存しない。
@@ -147,10 +152,30 @@ POST /sessions/{id}/finish
        │    └─ gpt-4o-mini + structured output → list[KnowledgeExtraction]
        └─ 各 KnowledgeExtraction に対して:
             ├─ KnowledgeRepository.create()
-            └─ KeywordRepository.get_or_create() + KnowledgeKeyword 登録
+            ├─ KeywordRepository.get_or_create() + KnowledgeKeyword 登録
+            └─ OpenAIEmbeddingProvider.embed_text(title+question+summary+answer)
+                 └─ KnowledgeRepository.update_embedding()  ← embedding 保存
+                 ※ 失敗は WARNING ログのみ（非ブロッキング）
 ```
 
 Knowledge 抽出失敗は非ブロッキング。失敗しても Session 終了は成功する。
+
+---
+
+## Semantic Search Flow
+
+```
+GET /knowledge/semantic_search?q=...
+  │
+  ├─ OpenAIEmbeddingProvider.embed_text(q)  ← OpenAI text-embedding-3-small (1536次元)
+  └─ KnowledgeRepository.semantic_search(embedding)
+       └─ SELECT ... WHERE embedding IS NOT NULL
+          ORDER BY embedding <=> :vec   ← pgvector コサイン距離
+          LIMIT :n
+```
+
+テキスト検索（`GET /knowledge/search`）は LIKE ベース、セマンティック検索は pgvector ベース。
+両方のエンドポイントを並存させる。
 
 ---
 
@@ -207,7 +232,7 @@ RealtimeVoiceService
 
 ## Future Extensions (Post-MVP)
 
-- **Vector Search**: pgvector による意味検索（Phase 22）
+- **Vector Index 最適化**: IVFFlat / HNSW インデックスによる検索高速化（データ件数増加後）
 - **iOS / Web**: Flutter クロスプラットフォーム展開（Phase 26）
 - **Gemini Live Provider**: VoiceProvider の実装追加（Phase 27）
 - **Knowledge Graph**: KnowledgeRelation テーブルによる関連可視化（Phase 23）

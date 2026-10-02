@@ -149,5 +149,6 @@ uv run alembic revision --autogenerate -m "description"
 - Backend: Python / FastAPI（Railway にデプロイ）
 - Database: PostgreSQL（Railway managed）+ pgvector
 - Voice AI: OpenAI Realtime API / WebRTC
+- Search: テキスト検索（LIKE）+ セマンティック検索（pgvector / text-embedding-3-small）
 
 詳細は [docs/architecture.md](docs/architecture.md) を参照。

@@ -4,7 +4,7 @@
 
 本番環境は PostgreSQL（Railway managed）を使用する。Alembic でマイグレーションを管理する。
 ローカル開発は SQLite を使用する（`DATABASE_URL=sqlite:///./app.db`）。
-pgvector extension は有効化済み。Phase 22 で `embedding` カラムを追加し Vector Search を実現予定。
+pgvector extension は有効化済み。`knowledge` テーブルに `embedding` カラム（Vector(1536)）を追加し、セマンティック検索を実現している（Phase 22）。
 
 ---
 
@@ -61,6 +61,7 @@ pgvector extension は有効化済み。Phase 22 で `embedding` カラムを追
 | answer | TEXT | NULL | 回答 |
 | category | VARCHAR | NULL | カテゴリ（1〜3 語） |
 | related_questions | TEXT | NULL | 派生質問リスト（JSON 配列） |
+| embedding | VECTOR(1536) | NULL | テキスト埋め込みベクトル（text-embedding-3-small）。PostgreSQL のみ。NULL = 未生成 |
 | created_at | DATETIME | NOT NULL | 抽出日時 |
 | updated_at | DATETIME | NOT NULL | 更新日時 |
 
@@ -152,5 +153,4 @@ uv run alembic downgrade -1
 
 ## Future Extensions (Post-MVP)
 
-- **pgvector**: `knowledge` テーブルに `embedding` カラムを追加し Vector Search を実現（Phase 22）
 - **KnowledgeRelation テーブル**: Knowledge 間の関連（関連概念・前提知識等）を管理（Phase 23）
