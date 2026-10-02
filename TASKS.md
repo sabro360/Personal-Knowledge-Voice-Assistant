@@ -1045,7 +1045,7 @@ docs/database.md
 
 ---
 
-## T2004 MVP Build作成
+## [x] T2004 MVP Build作成
 
 Android buildを生成する。
 
